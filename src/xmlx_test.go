@@ -12,7 +12,7 @@ func TestDoc(t *testing.T) {
 	}
 
 	if len(doc.Root.Children) == 0 {
-		t.Errorf("Root node has no children.", err);
+		t.Errorf("Root node has no children.");
 		return;
 	}
 }
