@@ -1,7 +1,6 @@
 package xmlx
 
 import "testing"
-import "fmt"
 
 func TestDoc(t *testing.T) {
 	doc := New();
@@ -53,15 +52,6 @@ func TestNodeSearch(t *testing.T) {
 	if len(nodes) == 0 {
 		t.Errorf("SelectNodes(): no nodes found.");
 		return;
-	}
-}
-
-
-func TestEnt(t *testing.T) {
-	doc := New();
-	doc.LoadExtendedEntityMap();
-	for k, v := range doc.Entity {
-		fmt.Printf(" %s = %s\n", k, v)
 	}
 }
 
