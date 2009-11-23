@@ -1,0 +1,38 @@
+
+ Author: Jim Teeuwen <jimteeuwen@gmail.com>
+
+ This package wraps the standard XML library and uses it to build a node tree of
+ any document you load. This allows you to look up nodes forwards and backwards,
+ as well as perform search queries (no xpath support yet).
+
+ Nodes now simply become collections and don't require you to read them in the
+ order in which the xml.Parser finds them.
+
+ xmlx.Document implements both these interfaces:
+ 
+	type ILoader interface {
+		LoadFile(string) os.Error;
+		LoadString(string) os.Error;
+		LoadStream(*io.Reader) os.Error;
+	}
+
+	type ISaver interface {
+		SaveFile(string) os.Error;
+		SaveString(string) (string, os.Error);
+		SaveStream(*io.Writer) os.Error;
+	}
+
+ This allows you to load/save xml data to and from pretty much any source.
+
+ The Document currently implements 2 simple search functions which allow you to
+ look for specific nodes.
+ 
+   Document.SelectNode(namespace, name string) *Node;
+   Document.SelectNodes(namespace, name string) []*Node;
+ 
+ SelectNode() returns the first, single node it finds matching the given name
+ and namespace. SelectNodes() returns a slice containing all the matching nodes.
+ 
+ Note that these search functions can be invoked on individual nodes as well.
+ This allows you to search only a subset of the entire document.
+
