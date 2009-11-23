@@ -31,6 +31,76 @@ type Node struct {
 
 func NewNode(tid byte) *Node	{ return &Node{Type: tid} }
 
+// Get node value as string
+func (this *Node) GetValue(namespace, name string) string {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return "" }
+	return node.Value;
+}
+
+// Get node value as int
+func (this *Node) GetValuei(namespace, name string) int {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atoi(node.Value);
+	return n;
+}
+
+// Get node value as int64
+func (this *Node) GetValuei64(namespace, name string) int64 {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atoi64(node.Value);
+	return n;
+}
+
+// Get node value as uint
+func (this *Node) GetValueui(namespace, name string) uint {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atoui(node.Value);
+	return n;
+}
+
+// Get node value as uint64
+func (this *Node) GetValueui64(namespace, name string) uint64 {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atoui64(node.Value);
+	return n;
+}
+
+// Get node value as float
+func (this *Node) GetValuef(namespace, name string) float {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atof(node.Value);
+	return n;
+}
+
+// Get node value as float32
+func (this *Node) GetValuef32(namespace, name string) float32 {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atof32(node.Value);
+	return n;
+}
+
+// Get node value as float64
+func (this *Node) GetValuef64(namespace, name string) float64 {
+	node := rec_SelectNode(this, namespace, name);
+	if node == nil { return 0 }
+	if node.Value == "" { return 0 }
+	n, _ := strconv.Atof64(node.Value);
+	return n;
+}
+
 // Get attribute value as string
 func (this *Node) GetAttr(namespace, name string) string {
 	for _,v := range this.Attributes {
