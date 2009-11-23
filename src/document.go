@@ -55,6 +55,7 @@ type Document struct {
 	StandAlone	string;
 	SaveDocType	bool;
 	Root		*Node;
+	Entity		map[string]string;
 }
 
 func New() *Document {
@@ -63,6 +64,7 @@ func New() *Document {
 		Encoding: "utf-8",
 		StandAlone: "yes",
 		SaveDocType: true,
+		Entity: make(map[string]string)
 	}
 }
 
@@ -70,7 +72,6 @@ func (this *Document) String() string {
 	s, _ := this.SaveString();
 	return s;
 }
-
 
 func (this *Document) SelectNode(namespace, name string) *Node {
 	return this.Root.SelectNode(namespace, name);
@@ -85,6 +86,8 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 // *****************************************************************************
 func (this *Document) LoadString(s string) (err os.Error) {
 	xp := xml.NewParser(strings.NewReader(s));
+	xp.Entity = this.Entity;
+
 	this.Root = NewNode(NT_ROOT);
 	ct := this.Root;
 
