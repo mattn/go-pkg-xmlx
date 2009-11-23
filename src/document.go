@@ -68,6 +68,15 @@ func New() *Document {
 	}
 }
 
+// This loads a rather massive table of non-conventional xml escape sequences.
+// Needed to make the parser map them to characters properly. It is advised to
+// set only those entities needed manually using the document.Entity map, but
+// if need be, this method can be called to fill the map with the entire set
+// defined on http://www.w3.org/TR/html4/sgml/entities.html
+func (this *Document) LoadExtendedEntityMap() {
+	entitymap_load(&this.Entity);
+}
+
 func (this *Document) String() string {
 	s, _ := this.SaveString();
 	return s;
