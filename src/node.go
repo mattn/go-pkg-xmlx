@@ -2,6 +2,7 @@ package xmlx
 
 import "xml"
 import "fmt"
+import "strconv"
 
 const (
 	NT_ROOT		= 0x00;
@@ -30,6 +31,83 @@ type Node struct {
 
 func NewNode(tid byte) *Node	{ return &Node{Type: tid} }
 
+// Get attribute value as string
+func (this *Node) GetAttr(namespace, name string) string {
+	for _,v := range this.Attributes {
+		if namespace == v.Name.Space && name == v.Name.Local {
+			return v.Value;
+		}
+	}
+	return "";
+}
+
+// Get attribute value as int
+func (this *Node) GetAttri(namespace, name string) int {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atoi(s);
+	return n;
+}
+
+// Get attribute value as uint
+func (this *Node) GetAttrui(namespace, name string) uint {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atoui(s);
+	return n;
+}
+
+// Get attribute value as uint64
+func (this *Node) GetAttrui64(namespace, name string) uint64 {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atoui64(s);
+	return n;
+}
+
+// Get attribute value as int64
+func (this *Node) GetAttri64(namespace, name string) int64 {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atoi64(s);
+	return n;
+}
+
+// Get attribute value as float
+func (this *Node) GetAttrf(namespace, name string) float {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atof(s);
+	return n;
+}
+
+// Get attribute value as float32
+func (this *Node) GetAttrf32(namespace, name string) float32 {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atof32(s);
+	return n;
+}
+
+// Get attribute value as float64
+func (this *Node) GetAttrf64(namespace, name string) float64 {
+	s := this.GetAttr(namespace, name);
+	if s == "" { return 0 }
+	n, _ := strconv.Atof64(s);
+	return n;
+}
+
+// Returns true if this node has the specified attribute. False otherwise.
+func (this *Node) HasAttr(namespace, name string) bool {
+	for _,v := range this.Attributes {
+		if namespace == v.Name.Space && name == v.Name.Local {
+			return true
+		}
+	}
+	return false
+}
+
+// Select single node by name
 func (this *Node) SelectNode(namespace, name string) *Node {
 	return rec_SelectNode(this, namespace, name);
 }
@@ -46,6 +124,7 @@ func rec_SelectNode(cn *Node, namespace, name string) *Node {
 	return nil;
 }
 
+// Select multiple nodes by name
 func (this *Node) SelectNodes(namespace, name string) []*Node {
 	list := make([]*Node, 0);
 	rec_SelectNodes(this, namespace, name, &list);
@@ -68,6 +147,10 @@ func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
 	}
 }
 
+// Convert node to appropriate string representation based on it's @Type.
+// Note that NT_ROOT is a special-case empty node used as the root for a 
+// Document. This one has no representation by itself. It merely forwards the
+// String() call to it's child nodes.
 func (this *Node) String() (s string) {
 	switch this.Type {
 	case NT_PROCINST:
@@ -141,6 +224,7 @@ func (this *Node) printElement() (s string) {
 	return;
 }
 
+// Add a child node
 func (this *Node) AddChild(t *Node) {
 	if t.Parent != nil {
 		t.Parent.RemoveChild(t)
@@ -155,6 +239,7 @@ func (this *Node) AddChild(t *Node) {
 	this.Children = slice;
 }
 
+// Remove a child node
 func (this *Node) RemoveChild(t *Node) {
 	pos := -1;
 	for i, v := range this.Children {
