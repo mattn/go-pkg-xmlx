@@ -12,22 +12,6 @@
  Nodes now simply become collections and don't require you to read them in the
  order in which the xml.Parser finds them.
 
- xmlx.Document implements both these interfaces:
- 
-	type ILoader interface {
-		LoadFile(string) os.Error;
-		LoadString(string) os.Error;
-		LoadStream(*io.Reader) os.Error;
-	}
-
-	type ISaver interface {
-		SaveFile(string) os.Error;
-		SaveString(string) (string, os.Error);
-		SaveStream(*io.Writer) os.Error;
-	}
-
- This allows you to load/save xml data to and from pretty much any source.
-
  The Document currently implements 2 simple search functions which allow you to
  look for specific nodes.
  
@@ -56,6 +40,7 @@ type Document struct {
 	SaveDocType	bool;
 	Root		*Node;
 	Entity		map[string]string;
+	Verbose		bool;
 }
 
 func New() *Document {
@@ -64,7 +49,8 @@ func New() *Document {
 		Encoding: "utf-8",
 		StandAlone: "yes",
 		SaveDocType: true,
-		Entity: make(map[string]string)
+		Entity: make(map[string]string),
+		Verbose: false
 	}
 }
 
@@ -103,6 +89,9 @@ func (this *Document) LoadString(s string) (err os.Error) {
 	for {
 		tok, err := xp.Token();
 		if err != nil {
+			if err != os.EOF && this.Verbose {
+				fmt.Fprintf(os.Stderr, "Xml Error: %s\n", err);
+			}
 			return
 		}
 
