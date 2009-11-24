@@ -1,12 +1,54 @@
 package xmlx
 
+import "fmt"
+import "utf8"
+import "regexp"
+import "strconv"
+
+var reg_entity = regexp.MustCompile("^&#[0-9]+;$");
+
+// Converts a single numerical html entity to a regular Go utf-token.
+//    ex: "&#9827;" -> "♣"
+func HtmlToUTF8(entity string) string {
+	// Make sure we have a valid entity: &#123;
+	ok := reg_entity.MatchString(entity);
+	if !ok { return "" }
+
+	// Convert entity to number
+	num, err := strconv.Atoi(entity[2:len(entity)-1]);
+	if err != nil { return "" }
+
+	var arr [3]byte;
+	size := utf8.EncodeRune(num, &arr);
+	if size == 0 { return "" }
+
+	return string(&arr);
+}
+
+// Converts a single Go utf-token to it's an Html entity.
+//   ex: "♣" -> "&#9827;"
+func UTF8ToHtml(token string) string {
+	rune, size := utf8.DecodeRuneInString(token);
+	if size == 0 { return "" }
+	return fmt.Sprintf("&#%d;", rune);
+}
+
+
 /*
-     Portions © International Organization for Standardization 1986
-     Permission to copy in any form is granted for use with
-     conforming SGML systems and applications as defined in
-     ISO 8879, provided this notice is included in all copies.
+	http://www.w3.org/TR/html4/sgml/entities.html
+
+	Portions © International Organization for Standardization 1986
+	Permission to copy in any form is granted for use with
+	conforming SGML systems and applications as defined in
+	ISO 8879, provided this notice is included in all copies.
+
+	Fills the supplied map with html entities mapped to their Go utf8
+	equivalents. This map can be assigned to xml.Parser.Entity
+	It will be used to map non-standard xml entities to a proper value.
+	If the parser encounters any unknown entities, it will throw a syntax
+	error and abort the parsing. Hence the ability to supply this map.
  */
-func entitymap_load(em *map[string]string) {
+func loadNonStandardEntities(em *map[string]string) {
 	// Generic entities string([]uint8{160});
 	(*em)["nbsp"] = " ";
 	(*em)["iexcl"] = "¡";

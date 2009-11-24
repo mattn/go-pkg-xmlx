@@ -60,7 +60,7 @@ func New() *Document {
 // if need be, this method can be called to fill the map with the entire set
 // defined on http://www.w3.org/TR/html4/sgml/entities.html
 func (this *Document) LoadExtendedEntityMap() {
-	entitymap_load(&this.Entity);
+	loadNonStandardEntities(&this.Entity);
 }
 
 func (this *Document) String() string {
