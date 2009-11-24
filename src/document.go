@@ -109,39 +109,33 @@ func (this *Document) LoadString(s string) (err os.Error) {
 		t1, ok := tok.(xml.SyntaxError);
 		if ok {
 			err = os.NewError(t1.String());
-			return;
+			return
 		}
 
 		t2, ok := tok.(xml.CharData);
-		if ok {
-			if ct != nil {
-				ct.Value = strings.TrimSpace(string(t2))
-			}
+		if ok && ct != nil {
+			ct.Value = strings.TrimSpace(string(t2));
 			continue
 		}
 
 		t3, ok := tok.(xml.Comment);
-		if ok {
+		if ok && ct != nil {
 			t := NewNode(NT_COMMENT);
 			t.Value = strings.TrimSpace(string(t3));
-			if ct != nil {
-				ct.AddChild(t)
-			}
+			ct.AddChild(t);
 			continue
 		}
 
 		t4, ok := tok.(xml.Directive);
-		if ok {
+		if ok && ct != nil {
 			t := NewNode(NT_DIRECTIVE);
 			t.Value = strings.TrimSpace(string(t4));
-			if ct != nil {
-				ct.AddChild(t)
-			}
+			ct.AddChild(t);
 			continue
 		}
 
 		t5, ok := tok.(xml.StartElement);
-		if ok {
+		if ok && ct != nil {
 			t := NewNode(NT_ELEMENT);
 			t.Name = t5.Name;
 			t.Attributes = make([]Attr, len(t5.Attr));
@@ -149,9 +143,7 @@ func (this *Document) LoadString(s string) (err os.Error) {
 				t.Attributes[i].Name = v.Name;
 				t.Attributes[i].Value = v.Value;
 			}
-			if ct != nil {
-				ct.AddChild(t)
-			}
+			ct.AddChild(t);
 			ct = t;
 			continue
 		}
@@ -186,13 +178,11 @@ func (this *Document) LoadString(s string) (err os.Error) {
 					pos = strings.Index(this.StandAlone, `"`);
 					this.StandAlone = this.StandAlone[0:pos];
 				}
-			} else {
+			} else if ct != nil {
 				t := NewNode(NT_PROCINST);
 				t.Target = strings.TrimSpace(t6.Target);
 				t.Value = strings.TrimSpace(string(t6.Inst));
-				if ct != nil {
-					ct.AddChild(t)
-				}
+				ct.AddChild(t);
 			}
 			continue
 		}
