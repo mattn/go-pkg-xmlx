@@ -4,6 +4,7 @@ import "os"
 import "io"
 
 type ILoader interface {
+	LoadUrl(string) os.Error;
 	LoadFile(string) os.Error;
 	LoadString(string) os.Error;
 	LoadStream(*io.Reader) os.Error;

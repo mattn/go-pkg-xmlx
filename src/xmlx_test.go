@@ -2,9 +2,24 @@ package xmlx
 
 import "testing"
 
-func TestDoc(t *testing.T) {
+func TestLoadLocal(t *testing.T) {
 	doc := New();
 	err := doc.LoadFile("test.xml");
+
+	if err != nil {
+		t.Errorf("%s", err);
+		return;
+	}
+
+	if len(doc.Root.Children) == 0 {
+		t.Errorf("Root node has no children.");
+		return;
+	}
+}
+
+func TestLoadRemote(t *testing.T) {
+	doc := New();
+	err := doc.LoadUri("http://tldp.org/authors/template/Sample-HOWTO.xml");
 
 	if err != nil {
 		t.Errorf("%s", err);

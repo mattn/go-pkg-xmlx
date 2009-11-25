@@ -32,6 +32,7 @@ import "io"
 import "strings"
 import "xml"
 import "fmt"
+import "http"
 
 type Document struct {
 	Version		string;
@@ -204,6 +205,23 @@ func (this *Document) LoadFile(path string) (err os.Error) {
 	}
 
 	err = this.LoadString(content);
+	return;
+}
+
+func (this *Document) LoadUri(uri string) (err os.Error) {
+	r, _, err := http.Get(uri);
+	if err != nil {
+		return
+	}
+
+	defer r.Body.Close();
+
+	b, err := io.ReadAll(r.Body);
+	if err != nil {
+		return
+	}
+
+	err = this.LoadString(string(b));
 	return;
 }
 
