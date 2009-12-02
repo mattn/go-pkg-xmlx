@@ -70,3 +70,41 @@ func TestNodeSearch(t *testing.T) {
 	}
 }
 
+type Image struct {
+	Title		string;
+	Url		string;
+	Link		string;
+	Width		string;
+	Height		string;
+	Description	string;
+}
+
+func TestUnmarshal(t *testing.T) {
+	doc := New();
+	err := doc.LoadFile("test.xml");
+
+	if err != nil {
+		t.Errorf("LoadFile(): %s", err);
+		return;
+	}
+
+	node := doc.SelectNode("", "image");
+	if node == nil {
+		t.Errorf("SelectNode(): No node found.");
+		return;
+	}
+
+	img := Image{};
+	err = node.Unmarshal(&img);
+	if err != nil {
+		t.Errorf("Unmarshal(): %s", err);
+		return;
+	}
+
+	if img.Title != "WriteTheWeb" {
+		t.Errorf("Image.Title has incorrect value. Got '%s', expected 'WriteTheWeb'.", img.Title);
+		return;
+	}
+}
+
+

@@ -1,5 +1,7 @@
 package xmlx
 
+import "os"
+import "strings"
 import "xml"
 import "fmt"
 import "strconv"
@@ -24,12 +26,16 @@ type Node struct {
 	Attributes	[]Attr;
 	Parent		*Node;
 	Value		string;
-
-	// procinst field
-	Target	string;
+	Target		string; // procinst field
 }
 
 func NewNode(tid byte) *Node	{ return &Node{Type: tid} }
+
+// This wraps the standard xml.Unmarshal function and supplies this particular 
+// node as the content to be unmarshalled.
+func (this *Node) Unmarshal(obj interface{}) os.Error {
+	return xml.Unmarshal(strings.NewReader(this.String()), obj);
+}
 
 // Get node value as string
 func (this *Node) GetValue(namespace, name string) string {
