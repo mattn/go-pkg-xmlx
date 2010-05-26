@@ -4,9 +4,8 @@ import "testing"
 
 func TestLoadLocal(t *testing.T) {
 	doc := New()
-	err := doc.LoadFile("test.xml")
 
-	if err != nil {
+	if err := doc.LoadFile("test.xml"); err != nil {
 		t.Errorf("%s", err)
 		return
 	}
@@ -19,9 +18,8 @@ func TestLoadLocal(t *testing.T) {
 
 func TestLoadRemote(t *testing.T) {
 	doc := New()
-	err := doc.LoadUri("http://tldp.org/authors/template/Sample-HOWTO.xml")
 
-	if err != nil {
+	if err := doc.LoadUri("http://www.w3schools.com/xml/plant_catalog.xml"); err != nil {
 		t.Errorf("%s", err)
 		return
 	}
@@ -34,15 +32,13 @@ func TestLoadRemote(t *testing.T) {
 
 func TestSave(t *testing.T) {
 	doc := New()
-	err := doc.LoadFile("test.xml")
 
-	if err != nil {
+	if err := doc.LoadFile("test.xml"); err != nil {
 		t.Errorf("LoadFile(): %s", err)
 		return
 	}
 
-	err = doc.SaveFile("test1.xml")
-	if err != nil {
+	if err := doc.SaveFile("test1.xml"); err != nil {
 		t.Errorf("SaveFile(): %s", err)
 		return
 	}
@@ -50,15 +46,13 @@ func TestSave(t *testing.T) {
 
 func TestNodeSearch(t *testing.T) {
 	doc := New()
-	err := doc.LoadFile("test.xml")
 
-	if err != nil {
+	if err := doc.LoadFile("test.xml"); err != nil {
 		t.Errorf("LoadFile(): %s", err)
 		return
 	}
 
-	node := doc.SelectNode("", "item")
-	if node == nil {
+	if node := doc.SelectNode("", "item"); node == nil {
 		t.Errorf("SelectNode(): No node found.")
 		return
 	}

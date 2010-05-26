@@ -29,6 +29,8 @@ package xmlx
 
 import "os"
 import "io"
+import "io/ioutil"
+import "path"
 import "strings"
 import "xml"
 import "fmt"
@@ -85,125 +87,75 @@ func (this *Document) LoadString(s string) (err os.Error) {
 	this.Root = NewNode(NT_ROOT)
 	ct := this.Root
 
+	var tok xml.Token
 	for {
-		tok, err := xp.Token()
-		if err != nil {
-			if err != os.EOF && this.Verbose {
+		if tok, err = xp.Token(); err != nil {
+			if err == os.EOF {
+				return nil
+			}
+
+			if this.Verbose {
 				fmt.Fprintf(os.Stderr, "Xml Error: %s\n", err)
 			}
-			return
+			return err
 		}
 
-		t1, ok := tok.(xml.SyntaxError)
-		if ok {
-			err = os.NewError(t1.String())
-			return
-		}
-
-		t2, ok := tok.(xml.CharData)
-		if ok && ct != nil {
-			ct.Value = strings.TrimSpace(string(t2))
-			continue
-		}
-
-		t3, ok := tok.(xml.Comment)
-		if ok && ct != nil {
+		switch tt := tok.(type) {
+		case xml.SyntaxError:
+			return os.NewError(tt.String())
+		case xml.CharData:
+			ct.Value = strings.TrimSpace(string(tt))
+		case xml.Comment:
 			t := NewNode(NT_COMMENT)
-			t.Value = strings.TrimSpace(string(t3))
+			t.Value = strings.TrimSpace(string(tt))
 			ct.AddChild(t)
-			continue
-		}
-
-		t4, ok := tok.(xml.Directive)
-		if ok && ct != nil {
+		case xml.Directive:
 			t := NewNode(NT_DIRECTIVE)
-			t.Value = strings.TrimSpace(string(t4))
+			t.Value = strings.TrimSpace(string(tt))
 			ct.AddChild(t)
-			continue
-		}
-
-		t5, ok := tok.(xml.StartElement)
-		if ok && ct != nil {
+		case xml.StartElement:
 			t := NewNode(NT_ELEMENT)
-			t.Name = t5.Name
-			t.Attributes = make([]Attr, len(t5.Attr))
-			for i, v := range t5.Attr {
+			t.Name = tt.Name
+			t.Attributes = make([]Attr, len(tt.Attr))
+			for i, v := range tt.Attr {
 				t.Attributes[i].Name = v.Name
 				t.Attributes[i].Value = v.Value
 			}
 			ct.AddChild(t)
 			ct = t
-			continue
-		}
-
-		t6, ok := tok.(xml.ProcInst)
-		if ok {
-			if t6.Target == "xml" { // xml doctype
-				doctype := strings.TrimSpace(string(t6.Inst))
-
-				/* // Not needed. There is only xml version 1.0
-				pos := strings.Index(doctype, `version="`);
-				if pos > -1 {
-					this.Version = doctype[pos+len(`version="`) : len(doctype)];
-					pos = strings.Index(this.Version, `"`);
-					this.Version = this.Version[0:pos];
-				}
-				*/
-
-				/* // Not needed. Any string we handle in Go is UTF8
-				   // encoded. This means we will save UTF8 data as well.
-				pos = strings.Index(doctype, `encoding="`);
-				if pos > -1 {
-					this.Encoding = doctype[pos+len(`encoding="`) : len(doctype)];
-					pos = strings.Index(this.Encoding, `"`);
-					this.Encoding = this.Encoding[0:pos];
-				}
-				*/
-
+		case xml.ProcInst:
+			if tt.Target == "xml" { // xml doctype
+				doctype := strings.TrimSpace(string(tt.Inst))
 				pos := strings.Index(doctype, `standalone="`)
 				if pos > -1 {
 					this.StandAlone = doctype[pos+len(`standalone="`) : len(doctype)]
 					pos = strings.Index(this.StandAlone, `"`)
 					this.StandAlone = this.StandAlone[0:pos]
 				}
-			} else if ct != nil {
+			} else {
 				t := NewNode(NT_PROCINST)
-				t.Target = strings.TrimSpace(t6.Target)
-				t.Value = strings.TrimSpace(string(t6.Inst))
+				t.Target = strings.TrimSpace(tt.Target)
+				t.Value = strings.TrimSpace(string(tt.Inst))
 				ct.AddChild(t)
 			}
-			continue
-		}
-
-		_, ok = tok.(xml.EndElement)
-		if ok {
-			ct = ct.Parent
-			continue
+		case xml.EndElement:
+			if ct = ct.Parent; ct == nil {
+				return
+			}
 		}
 	}
 
 	return
 }
 
-func (this *Document) LoadFile(path string) (err os.Error) {
-	file, err := os.Open(path, os.O_RDONLY, 0600)
-	if err != nil {
+func (this *Document) LoadFile(filename string) (err os.Error) {
+	var data []byte
+
+	if data, err = ioutil.ReadFile(path.Clean(filename)); err != nil {
 		return
 	}
-	defer file.Close()
 
-	content := ""
-	buff := make([]byte, 256)
-	for {
-		_, err := file.Read(buff)
-		if err != nil {
-			break
-		}
-		content += string(buff)
-	}
-
-	err = this.LoadString(content)
-	return
+	return this.LoadString(string(data))
 }
 
 func (this *Document) LoadUri(uri string) (err os.Error) {
@@ -214,18 +166,12 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 
 	defer r.Body.Close()
 
-	data := ""
-	b := make([]byte, 256)
-
-	for {
-		n, err := io.ReadFull(r.Body, b)
-		if n == 0 || err == os.EOF {
-			break
-		}
-		data += string(b)
+	var b []byte
+	if b, err = ioutil.ReadAll(r.Body); err != nil {
+		return
 	}
 
-	err = this.LoadString(data)
+	err = this.LoadString(string(b))
 	return
 }
 
