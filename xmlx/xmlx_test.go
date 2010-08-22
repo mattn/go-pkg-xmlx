@@ -16,7 +16,7 @@ func TestLoadLocal(t *testing.T) {
 	}
 }
 
-func TestLoadRemote(t *testing.T) {
+func _TestLoadRemote(t *testing.T) {
 	doc := New()
 
 	if err := doc.LoadUri("http://www.w3schools.com/xml/plant_catalog.xml"); err != nil {
@@ -89,8 +89,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	img := Image{}
-	err = node.Unmarshal(&img)
-	if err != nil {
+	if err = node.Unmarshal(&img); err != nil {
 		t.Errorf("Unmarshal(): %s", err)
 		return
 	}

@@ -3,15 +3,16 @@ package xmlx
 import "os"
 import "strings"
 import "xml"
+import "bytes"
 import "fmt"
 import "strconv"
 
 const (
-	NT_ROOT      = 0x00
-	NT_DIRECTIVE = 0x01
-	NT_PROCINST  = 0x02
-	NT_COMMENT   = 0x03
-	NT_ELEMENT   = 0x04
+	NT_ROOT = iota
+	NT_DIRECTIVE
+	NT_PROCINST
+	NT_COMMENT
+	NT_ELEMENT
 )
 
 type Attr struct {
@@ -23,13 +24,19 @@ type Node struct {
 	Type       byte
 	Name       xml.Name
 	Children   []*Node
-	Attributes []Attr
+	Attributes []*Attr
 	Parent     *Node
 	Value      string
 	Target     string // procinst field
 }
 
-func NewNode(tid byte) *Node { return &Node{Type: tid} }
+func NewNode(tid byte) *Node {
+	n := new(Node)
+	n.Type = tid
+	n.Children = make([]*Node, 0, 10)
+	n.Attributes = make([]*Attr, 0, 10)
+	return n
+}
 
 // This wraps the standard xml.Unmarshal function and supplies this particular
 // node as the content to be unmarshalled.
@@ -49,10 +56,7 @@ func (this *Node) GetValue(namespace, name string) string {
 // Get node value as int
 func (this *Node) GetValuei(namespace, name string) int {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atoi(node.Value)
@@ -62,10 +66,7 @@ func (this *Node) GetValuei(namespace, name string) int {
 // Get node value as int64
 func (this *Node) GetValuei64(namespace, name string) int64 {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atoi64(node.Value)
@@ -75,10 +76,7 @@ func (this *Node) GetValuei64(namespace, name string) int64 {
 // Get node value as uint
 func (this *Node) GetValueui(namespace, name string) uint {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atoui(node.Value)
@@ -88,10 +86,7 @@ func (this *Node) GetValueui(namespace, name string) uint {
 // Get node value as uint64
 func (this *Node) GetValueui64(namespace, name string) uint64 {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atoui64(node.Value)
@@ -101,10 +96,7 @@ func (this *Node) GetValueui64(namespace, name string) uint64 {
 // Get node value as float
 func (this *Node) GetValuef(namespace, name string) float {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atof(node.Value)
@@ -114,10 +106,7 @@ func (this *Node) GetValuef(namespace, name string) float {
 // Get node value as float32
 func (this *Node) GetValuef32(namespace, name string) float32 {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atof32(node.Value)
@@ -127,10 +116,7 @@ func (this *Node) GetValuef32(namespace, name string) float32 {
 // Get node value as float64
 func (this *Node) GetValuef64(namespace, name string) float64 {
 	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return 0
-	}
-	if node.Value == "" {
+	if node == nil || node.Value == "" {
 		return 0
 	}
 	n, _ := strconv.Atof64(node.Value)
@@ -237,9 +223,9 @@ func rec_SelectNode(cn *Node, namespace, name string) *Node {
 		return cn
 	}
 
+	var tn *Node
 	for _, v := range cn.Children {
-		tn := rec_SelectNode(v, namespace, name)
-		if tn != nil {
+		if tn = rec_SelectNode(v, namespace, name); tn != nil {
 			return tn
 		}
 	}
@@ -248,17 +234,21 @@ func rec_SelectNode(cn *Node, namespace, name string) *Node {
 
 // Select multiple nodes by name
 func (this *Node) SelectNodes(namespace, name string) []*Node {
-	list := make([]*Node, 0)
+	list := make([]*Node, 0, 16)
 	rec_SelectNodes(this, namespace, name, &list)
 	return list
 }
 
 func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
 	if cn.Name.Space == namespace && cn.Name.Local == name {
-		c := make([]*Node, len(*list)+1)
-		copy(c, *list)
-		c[len(c)-1] = cn
-		*list = c
+		l := len(*list)
+		if l >= cap(*list) {
+			c := make([]*Node, l, l+16)
+			copy(c, *list)
+			*list = c
+		}
+		*list = (*list)[0 : l+1]
+		(*list)[l] = cn
 		return
 	}
 
@@ -288,60 +278,73 @@ func (this *Node) String() (s string) {
 }
 
 func (this *Node) printRoot() (s string) {
+	var data []byte
+	buf := bytes.NewBuffer(data)
 	for _, v := range this.Children {
-		s += v.String()
+		buf.WriteString(v.String())
 	}
-	return
+	return buf.String()
 }
 
-func (this *Node) printProcInst() (s string) {
-	s = "<?" + this.Target + " " + this.Value + "?>"
-	return
+func (this *Node) printProcInst() string {
+	return "<?" + this.Target + " " + this.Value + "?>"
 }
 
-func (this *Node) printComment() (s string) {
-	s = "<!-- " + this.Value + " -->"
-	return
+func (this *Node) printComment() string {
+	return "<!-- " + this.Value + " -->"
 }
 
-func (this *Node) printDirective() (s string) {
-	s = "<!" + this.Value + "!>"
-	return
+func (this *Node) printDirective() string {
+	return "<!" + this.Value + "!>"
 }
 
-func (this *Node) printElement() (s string) {
+func (this *Node) printElement() string {
+	var data []byte
+	buf := bytes.NewBuffer(data)
+
 	if len(this.Name.Space) > 0 {
-		s = "<" + this.Name.Space + ":" + this.Name.Local
+		buf.WriteRune('<')
+		buf.WriteString(this.Name.Space)
+		buf.WriteRune(':')
+		buf.WriteString(this.Name.Local)
 	} else {
-		s = "<" + this.Name.Local
+		buf.WriteRune('<')
+		buf.WriteString(this.Name.Local)
 	}
 
 	for _, v := range this.Attributes {
 		if len(v.Name.Space) > 0 {
-			s += fmt.Sprintf(` %s:%s="%s"`, v.Name.Space, v.Name.Local, v.Value)
+			buf.WriteString(fmt.Sprintf(` %s:%s="%s"`, v.Name.Space, v.Name.Local, v.Value))
 		} else {
-			s += fmt.Sprintf(` %s="%s"`, v.Name.Local, v.Value)
+			buf.WriteString(fmt.Sprintf(` %s="%s"`, v.Name.Local, v.Value))
 		}
 	}
 
 	if len(this.Children) == 0 && len(this.Value) == 0 {
-		s += " />"
-		return
+		buf.WriteString(" />")
+		return buf.String()
 	}
 
-	s += ">"
+	buf.WriteRune('>')
 
 	for _, v := range this.Children {
-		s += v.String()
+		buf.WriteString(v.String())
 	}
 
-	s += this.Value
+	buf.WriteString(this.Value)
 	if len(this.Name.Space) > 0 {
-		s += "</" + this.Name.Space + ":" + this.Name.Local + ">"
+		buf.WriteString("</")
+		buf.WriteString(this.Name.Space)
+		buf.WriteRune(':')
+		buf.WriteString(this.Name.Local)
+		buf.WriteRune('>')
 	} else {
-		s += "</" + this.Name.Local + ">"
+		buf.WriteString("</")
+		buf.WriteString(this.Name.Local)
+		buf.WriteRune('>')
 	}
-	return
+
+	return buf.String()
 }
 
 // Add a child node
@@ -351,10 +354,15 @@ func (this *Node) AddChild(t *Node) {
 	}
 	t.Parent = this
 
-	c := make([]*Node, len(this.Children)+1)
-	copy(c, this.Children)
-	c[len(c)-1] = t
-	this.Children = c
+	l := len(this.Children)
+	if l >= cap(this.Children) {
+		c := make([]*Node, l, l+10)
+		copy(c, this.Children)
+		this.Children = c
+	}
+
+	this.Children = this.Children[0 : l+1]
+	this.Children[l] = t
 }
 
 // Remove a child node
@@ -371,10 +379,8 @@ func (this *Node) RemoveChild(t *Node) {
 		return
 	}
 
-	c := make([]*Node, len(this.Children)-1)
-	copy(c, this.Children[0:p])
-	copy(c[p:], this.Children[p+1:])
-	this.Children = c
+	copy(this.Children[p:], this.Children[p+1:])
+	this.Children = this.Children[0 : len(this.Children)-1]
 
 	t.Parent = nil
 }

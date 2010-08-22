@@ -29,6 +29,7 @@ package xmlx
 
 import "os"
 import "io"
+import "bytes"
 import "io/ioutil"
 import "path"
 import "strings"
@@ -62,7 +63,7 @@ func New() *Document {
 // set only those entities needed manually using the document.Entity map, but
 // if need be, this method can be called to fill the map with the entire set
 // defined on http://www.w3.org/TR/html4/sgml/entities.html
-func (this *Document) LoadExtendedEntityMap() { loadNonStandardEntities(&this.Entity) }
+func (this *Document) LoadExtendedEntityMap() { loadNonStandardEntities(this.Entity) }
 
 func (this *Document) String() string {
 	s, _ := this.SaveString()
@@ -88,6 +89,11 @@ func (this *Document) LoadString(s string) (err os.Error) {
 	ct := this.Root
 
 	var tok xml.Token
+	var t *Node
+	var i int
+	var doctype string
+	var v xml.Attr
+
 	for {
 		if tok, err = xp.Token(); err != nil {
 			if err == os.EOF {
@@ -104,20 +110,21 @@ func (this *Document) LoadString(s string) (err os.Error) {
 		case xml.SyntaxError:
 			return os.NewError(tt.String())
 		case xml.CharData:
-			ct.Value = strings.TrimSpace(string(tt))
+			ct.Value = strings.TrimSpace(string([]byte(tt)))
 		case xml.Comment:
 			t := NewNode(NT_COMMENT)
-			t.Value = strings.TrimSpace(string(tt))
+			t.Value = strings.TrimSpace(string([]byte(tt)))
 			ct.AddChild(t)
 		case xml.Directive:
-			t := NewNode(NT_DIRECTIVE)
-			t.Value = strings.TrimSpace(string(tt))
+			t = NewNode(NT_DIRECTIVE)
+			t.Value = strings.TrimSpace(string([]byte(tt)))
 			ct.AddChild(t)
 		case xml.StartElement:
-			t := NewNode(NT_ELEMENT)
+			t = NewNode(NT_ELEMENT)
 			t.Name = tt.Name
-			t.Attributes = make([]Attr, len(tt.Attr))
-			for i, v := range tt.Attr {
+			t.Attributes = make([]*Attr, len(tt.Attr))
+			for i, v = range tt.Attr {
+				t.Attributes[i] = new(Attr)
 				t.Attributes[i].Name = v.Name
 				t.Attributes[i].Value = v.Value
 			}
@@ -125,15 +132,14 @@ func (this *Document) LoadString(s string) (err os.Error) {
 			ct = t
 		case xml.ProcInst:
 			if tt.Target == "xml" { // xml doctype
-				doctype := strings.TrimSpace(string(tt.Inst))
-				pos := strings.Index(doctype, `standalone="`)
-				if pos > -1 {
-					this.StandAlone = doctype[pos+len(`standalone="`) : len(doctype)]
-					pos = strings.Index(this.StandAlone, `"`)
-					this.StandAlone = this.StandAlone[0:pos]
+				doctype = strings.TrimSpace(string(tt.Inst))
+				if i = strings.Index(doctype, `standalone="`); i > -1 {
+					this.StandAlone = doctype[i+len(`standalone="`) : len(doctype)]
+					i = strings.Index(this.StandAlone, `"`)
+					this.StandAlone = this.StandAlone[0:i]
 				}
 			} else {
-				t := NewNode(NT_PROCINST)
+				t = NewNode(NT_PROCINST)
 				t.Target = strings.TrimSpace(tt.Target)
 				t.Value = strings.TrimSpace(string(tt.Inst))
 				ct.AddChild(t)
@@ -176,17 +182,20 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 }
 
 func (this *Document) LoadStream(r *io.Reader) (err os.Error) {
-	content := ""
-	buff := make([]byte, 256)
+	var data []byte
+
+	t := bytes.NewBuffer(data)
+	s := make([]byte, 1024)
+
 	for {
-		_, err := r.Read(buff)
+		_, err := r.Read(s)
 		if err != nil {
 			break
 		}
-		content += string(buff)
+		t.Write(s)
 	}
 
-	err = this.LoadString(content)
+	err = this.LoadString(t.String())
 	return
 }
 
@@ -194,19 +203,12 @@ func (this *Document) LoadStream(r *io.Reader) (err os.Error) {
 // *** Satisfy ISaver interface
 // *****************************************************************************
 func (this *Document) SaveFile(path string) (err os.Error) {
-	file, err := os.Open(path, os.O_WRONLY|os.O_CREAT, 0600)
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	content, err := this.SaveString()
-	if err != nil {
+	var data string
+	if data, err = this.SaveString(); err != nil {
 		return
 	}
 
-	file.Write([]byte(content))
-	return
+	return ioutil.WriteFile(path, []byte(data), 0600)
 }
 
 func (this *Document) SaveString() (s string, err os.Error) {
