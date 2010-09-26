@@ -1,9 +1,10 @@
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 /*
- Author: Jim Teeuwen <jimteeuwen@gmail.com>
+Copyright (c) 2010, Jim Teeuwen.
+All rights reserved.
+
+This code is subject to a 1-clause BSD license.
+The contents of which can be found in the LICENSE file.
+
 
  This package wraps the standard XML library and uses it to build a node tree of
  any document you load. This allows you to look up nodes forwards and backwards,

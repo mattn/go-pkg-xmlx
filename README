@@ -3,10 +3,25 @@
 
  This package wraps the standard XML library and uses it to build a node tree of
  any document you load. This allows you to look up nodes forwards and backwards,
- as well as perform search queries (no xpath support yet).
+ as well as perform search queries (no xpath support).
 
  Nodes now simply become collections and don't require you to read them in the
  order in which the xml.Parser finds them.
+
+================================================================================
+ USAGE
+================================================================================
+
+ Getting the package up and running is simple enough:
+ 
+ $ cd /path/to/code/dir
+ $ git clone http://github.com/jteeuwen/go-pkg-xmlx.git
+ $ cd go-pkg-xmlx
+ $ make
+
+================================================================================
+ API
+================================================================================
 
  The Document currently implements 2 simple search functions which allow you to
  look for specific nodes.
@@ -63,5 +78,10 @@
 
  All of these functions return either "" or 0 when the specified node or
  attribute could not be found. No errors are generated.
- 
- 
+
+================================================================================
+ LICENSE
+================================================================================
+
+This code is subject to a 1-clause BSD license.
+It's contents can be found in the LICENSE file.

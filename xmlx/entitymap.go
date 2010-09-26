@@ -1,44 +1,67 @@
+/*
+Copyright (c) 2010, Jim Teeuwen.
+All rights reserved.
+
+This code is subject to a 1-clause BSD license.
+The contents of which can be found in the LICENSE file.
+*/
+
 package xmlx
 
+/*
+	These routines offer conversions between xml entities and their respective
+	unicode representations.
+
+	eg:
+		&#9827;  -> ♣   -> &#9827;
+		&pi;     -> π   -> &#960;
+
+	Note that named entities are case sensitive.
+	"&acirc;" (â) is not the same as "&Acirc;" (Â).
+*/
+
+import "os"
 import "fmt"
 import "utf8"
 import "regexp"
 import "strconv"
 
-var reg_entity = regexp.MustCompile("^&#[0-9]+;$")
+var reg_entnumeric = regexp.MustCompile("^&#[0-9]+;$")
+var reg_entnamed = regexp.MustCompile("^&[a-zA-Z]+;$")
 
-// Converts a single numerical html entity to a regular Go utf-token.
-//    ex: "&#9827;" -> "♣"
-func HtmlToUTF8(entity string) string {
-	// Make sure we have a valid entity: &#123;
-	ok := reg_entity.MatchString(entity)
-	if !ok {
-		return ""
+// Converts a single numerical html entity to a regular Go utf8-token.
+func EntityToUtf8(entity string) string {
+	var ok bool
+	if ok = reg_entnamed.MatchString(entity); ok {
+		return namedEntityToUtf8(entity[1 : len(entity)-1])
 	}
 
-	// Convert entity to number
-	num, err := strconv.Atoi(entity[2 : len(entity)-1])
-	if err != nil {
-		return ""
+	if ok = reg_entnumeric.MatchString(entity); !ok {
+		return "&amp;" + entity[2:len(entity)-1] + ";"
 	}
 
-	var arr []byte
-	size := utf8.EncodeRune(num, arr)
-	if size == 0 {
-		return ""
+	var err os.Error
+	var num int
+
+	entity = entity[2 : len(entity)-1]
+	if num, err = strconv.Atoi(entity); err != nil {
+		return "&amp;#" + entity + ";"
 	}
 
-	return string(arr)
+	var arr [4]byte
+	if size := utf8.EncodeRune(num, arr[0:]); size == 0 {
+		return "&amp;#" + entity + ";"
+	}
+
+	return string(arr[0:])
 }
 
-// Converts a single Go utf-token to it's an Html entity.
-//   ex: "♣" -> "&#9827;"
-func UTF8ToHtml(token string) string {
-	rune, size := utf8.DecodeRuneInString(token)
-	if size == 0 {
-		return ""
+// Converts a single Go utf8-token to a Html entity.
+func Utf8ToEntity(entity string) string {
+	if rune, size := utf8.DecodeRuneInString(entity); size != 0 {
+		return fmt.Sprintf("&#%d;", rune)
 	}
-	return fmt.Sprintf("&#%d;", rune)
+	return entity
 }
 
 /*
@@ -308,4 +331,522 @@ func loadNonStandardEntities(em map[string]string) {
 	em["quot"] = "\u0022"
 	em["Scaron"] = "\u0160"
 	em["ugrave"] = "\u00f9"
+}
+
+/*
+	http://www.w3.org/TR/html4/sgml/entities.html
+
+	Portions © International Organization for Standardization 1986
+	Permission to copy in any form is granted for use with
+	conforming SGML systems and applications as defined in
+	ISO 8879, provided this notice is included in all copies.
+*/
+func namedEntityToUtf8(name string) string {
+	switch name {
+	case "pi":
+		return "\u03c0"
+	case "nabla":
+		return "\u2207"
+	case "isin":
+		return "\u2208"
+	case "loz":
+		return "\u25ca"
+	case "prop":
+		return "\u221d"
+	case "para":
+		return "\u00b6"
+	case "Aring":
+		return "\u00c5"
+	case "euro":
+		return "\u20ac"
+	case "sup3":
+		return "\u00b3"
+	case "sup2":
+		return "\u00b2"
+	case "sup1":
+		return "\u00b9"
+	case "prod":
+		return "\u220f"
+	case "gamma":
+		return "\u03b3"
+	case "perp":
+		return "\u22a5"
+	case "lfloor":
+		return "\u230a"
+	case "fnof":
+		return "\u0192"
+	case "frasl":
+		return "\u2044"
+	case "rlm":
+		return "\u200f"
+	case "omega":
+		return "\u03c9"
+	case "part":
+		return "\u2202"
+	case "euml":
+		return "\u00eb"
+	case "Kappa":
+		return "\u039a"
+	case "nbsp":
+		return "\u00a0"
+	case "Eacute":
+		return "\u00c9"
+	case "brvbar":
+		return "\u00a6"
+	case "otimes":
+		return "\u2297"
+	case "ndash":
+		return "\u2013"
+	case "thinsp":
+		return "\u2009"
+	case "nu":
+		return "\u03bd"
+	case "Upsilon":
+		return "\u03a5"
+	case "upsih":
+		return "\u03d2"
+	case "raquo":
+		return "\u00bb"
+	case "yacute":
+		return "\u00fd"
+	case "delta":
+		return "\u03b4"
+	case "eth":
+		return "\u00f0"
+	case "supe":
+		return "\u2287"
+	case "ne":
+		return "\u2260"
+	case "ni":
+		return "\u220b"
+	case "eta":
+		return "\u03b7"
+	case "uArr":
+		return "\u21d1"
+	case "image":
+		return "\u2111"
+	case "asymp":
+		return "\u2248"
+	case "oacute":
+		return "\u00f3"
+	case "rarr":
+		return "\u2192"
+	case "emsp":
+		return "\u2003"
+	case "acirc":
+		return "\u00e2"
+	case "shy":
+		return "\u00ad"
+	case "yuml":
+		return "\u00ff"
+	case "acute":
+		return "\u00b4"
+	case "int":
+		return "\u222b"
+	case "ccedil":
+		return "\u00e7"
+	case "Acirc":
+		return "\u00c2"
+	case "Ograve":
+		return "\u00d2"
+	case "times":
+		return "\u00d7"
+	case "weierp":
+		return "\u2118"
+	case "Tau":
+		return "\u03a4"
+	case "omicron":
+		return "\u03bf"
+	case "lt":
+		return "\u003c"
+	case "Mu":
+		return "\u039c"
+	case "Ucirc":
+		return "\u00db"
+	case "sub":
+		return "\u2282"
+	case "le":
+		return "\u2264"
+	case "sum":
+		return "\u2211"
+	case "sup":
+		return "\u2283"
+	case "lrm":
+		return "\u200e"
+	case "frac34":
+		return "\u00be"
+	case "Iota":
+		return "\u0399"
+	case "Ugrave":
+		return "\u00d9"
+	case "THORN":
+		return "\u00de"
+	case "rsaquo":
+		return "\u203a"
+	case "not":
+		return "\u00ac"
+	case "sigma":
+		return "\u03c3"
+	case "iuml":
+		return "\u00ef"
+	case "epsilon":
+		return "\u03b5"
+	case "spades":
+		return "\u2660"
+	case "theta":
+		return "\u03b8"
+	case "divide":
+		return "\u00f7"
+	case "Atilde":
+		return "\u00c3"
+	case "uacute":
+		return "\u00fa"
+	case "Rho":
+		return "\u03a1"
+	case "trade":
+		return "\u2122"
+	case "chi":
+		return "\u03c7"
+	case "agrave":
+		return "\u00e0"
+	case "or":
+		return "\u2228"
+	case "circ":
+		return "\u02c6"
+	case "middot":
+		return "\u00b7"
+	case "plusmn":
+		return "\u00b1"
+	case "aring":
+		return "\u00e5"
+	case "lsquo":
+		return "\u2018"
+	case "Yacute":
+		return "\u00dd"
+	case "oline":
+		return "\u203e"
+	case "copy":
+		return "\u00a9"
+	case "icirc":
+		return "\u00ee"
+	case "lowast":
+		return "\u2217"
+	case "Oacute":
+		return "\u00d3"
+	case "aacute":
+		return "\u00e1"
+	case "oplus":
+		return "\u2295"
+	case "crarr":
+		return "\u21b5"
+	case "thetasym":
+		return "\u03d1"
+	case "Beta":
+		return "\u0392"
+	case "laquo":
+		return "\u00ab"
+	case "rang":
+		return "\u232a"
+	case "tilde":
+		return "\u02dc"
+	case "Uuml":
+		return "\u00dc"
+	case "zwj":
+		return "\u200d"
+	case "mu":
+		return "\u03bc"
+	case "Ccedil":
+		return "\u00c7"
+	case "infin":
+		return "\u221e"
+	case "ouml":
+		return "\u00f6"
+	case "rfloor":
+		return "\u230b"
+	case "pound":
+		return "\u00a3"
+	case "szlig":
+		return "\u00df"
+	case "thorn":
+		return "\u00fe"
+	case "forall":
+		return "\u2200"
+	case "piv":
+		return "\u03d6"
+	case "rdquo":
+		return "\u201d"
+	case "frac12":
+		return "\u00bd"
+	case "frac14":
+		return "\u00bc"
+	case "Ocirc":
+		return "\u00d4"
+	case "Ecirc":
+		return "\u00ca"
+	case "kappa":
+		return "\u03ba"
+	case "Euml":
+		return "\u00cb"
+	case "minus":
+		return "\u2212"
+	case "cong":
+		return "\u2245"
+	case "hellip":
+		return "\u2026"
+	case "equiv":
+		return "\u2261"
+	case "cent":
+		return "\u00a2"
+	case "Uacute":
+		return "\u00da"
+	case "darr":
+		return "\u2193"
+	case "Eta":
+		return "\u0397"
+	case "sbquo":
+		return "\u201a"
+	case "rArr":
+		return "\u21d2"
+	case "igrave":
+		return "\u00ec"
+	case "uml":
+		return "\u00a8"
+	case "lambda":
+		return "\u03bb"
+	case "oelig":
+		return "\u0153"
+	case "harr":
+		return "\u2194"
+	case "ang":
+		return "\u2220"
+	case "clubs":
+		return "\u2663"
+	case "and":
+		return "\u2227"
+	case "permil":
+		return "\u2030"
+	case "larr":
+		return "\u2190"
+	case "Yuml":
+		return "\u0178"
+	case "cup":
+		return "\u222a"
+	case "Xi":
+		return "\u039e"
+	case "Alpha":
+		return "\u0391"
+	case "phi":
+		return "\u03c6"
+	case "ucirc":
+		return "\u00fb"
+	case "oslash":
+		return "\u00f8"
+	case "rsquo":
+		return "\u2019"
+	case "AElig":
+		return "\u00c6"
+	case "mdash":
+		return "\u2014"
+	case "psi":
+		return "\u03c8"
+	case "eacute":
+		return "\u00e9"
+	case "otilde":
+		return "\u00f5"
+	case "yen":
+		return "\u00a5"
+	case "gt":
+		return "\u003e"
+	case "Iuml":
+		return "\u00cf"
+	case "Prime":
+		return "\u2033"
+	case "Chi":
+		return "\u03a7"
+	case "ge":
+		return "\u2265"
+	case "reg":
+		return "\u00ae"
+	case "hearts":
+		return "\u2665"
+	case "auml":
+		return "\u00e4"
+	case "Agrave":
+		return "\u00c0"
+	case "sect":
+		return "\u00a7"
+	case "sube":
+		return "\u2286"
+	case "sigmaf":
+		return "\u03c2"
+	case "Gamma":
+		return "\u0393"
+	case "amp":
+		return "\u0026"
+	case "ensp":
+		return "\u2002"
+	case "ETH":
+		return "\u00d0"
+	case "Igrave":
+		return "\u00cc"
+	case "Omega":
+		return "\u03a9"
+	case "Lambda":
+		return "\u039b"
+	case "Omicron":
+		return "\u039f"
+	case "there4":
+		return "\u2234"
+	case "ntilde":
+		return "\u00f1"
+	case "xi":
+		return "\u03be"
+	case "dagger":
+		return "\u2020"
+	case "egrave":
+		return "\u00e8"
+	case "Delta":
+		return "\u0394"
+	case "OElig":
+		return "\u0152"
+	case "diams":
+		return "\u2666"
+	case "ldquo":
+		return "\u201c"
+	case "radic":
+		return "\u221a"
+	case "Oslash":
+		return "\u00d8"
+	case "Ouml":
+		return "\u00d6"
+	case "lceil":
+		return "\u2308"
+	case "uarr":
+		return "\u2191"
+	case "atilde":
+		return "\u00e3"
+	case "iquest":
+		return "\u00bf"
+	case "lsaquo":
+		return "\u2039"
+	case "Epsilon":
+		return "\u0395"
+	case "iacute":
+		return "\u00ed"
+	case "cap":
+		return "\u2229"
+	case "deg":
+		return "\u00b0"
+	case "Otilde":
+		return "\u00d5"
+	case "zeta":
+		return "\u03b6"
+	case "ocirc":
+		return "\u00f4"
+	case "scaron":
+		return "\u0161"
+	case "ecirc":
+		return "\u00ea"
+	case "ordm":
+		return "\u00ba"
+	case "tau":
+		return "\u03c4"
+	case "Auml":
+		return "\u00c4"
+	case "dArr":
+		return "\u21d3"
+	case "ordf":
+		return "\u00aa"
+	case "alefsym":
+		return "\u2135"
+	case "notin":
+		return "\u2209"
+	case "Pi":
+		return "\u03a0"
+	case "sdot":
+		return "\u22c5"
+	case "upsilon":
+		return "\u03c5"
+	case "iota":
+		return "\u03b9"
+	case "hArr":
+		return "\u21d4"
+	case "Sigma":
+		return "\u03a3"
+	case "lang":
+		return "\u2329"
+	case "curren":
+		return "\u00a4"
+	case "Theta":
+		return "\u0398"
+	case "lArr":
+		return "\u21d0"
+	case "Phi":
+		return "\u03a6"
+	case "Nu":
+		return "\u039d"
+	case "rho":
+		return "\u03c1"
+	case "alpha":
+		return "\u03b1"
+	case "iexcl":
+		return "\u00a1"
+	case "micro":
+		return "\u00b5"
+	case "cedil":
+		return "\u00b8"
+	case "Ntilde":
+		return "\u00d1"
+	case "Psi":
+		return "\u03a8"
+	case "Dagger":
+		return "\u2021"
+	case "Egrave":
+		return "\u00c8"
+	case "Icirc":
+		return "\u00ce"
+	case "nsub":
+		return "\u2284"
+	case "bdquo":
+		return "\u201e"
+	case "empty":
+		return "\u2205"
+	case "aelig":
+		return "\u00e6"
+	case "ograve":
+		return "\u00f2"
+	case "macr":
+		return "\u00af"
+	case "Zeta":
+		return "\u0396"
+	case "beta":
+		return "\u03b2"
+	case "sim":
+		return "\u223c"
+	case "uuml":
+		return "\u00fc"
+	case "Aacute":
+		return "\u00c1"
+	case "Iacute":
+		return "\u00cd"
+	case "exist":
+		return "\u2203"
+	case "prime":
+		return "\u2032"
+	case "rceil":
+		return "\u2309"
+	case "real":
+		return "\u211c"
+	case "zwnj":
+		return "\u200c"
+	case "bull":
+		return "\u2022"
+	case "quot":
+		return "\u0022"
+	case "Scaron":
+		return "\u0160"
+	case "ugrave":
+		return "\u00f9"
+	}
+	return "&amp;" + name + ";"
 }
