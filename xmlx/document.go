@@ -182,7 +182,7 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 	return
 }
 
-func (this *Document) LoadStream(r *io.Reader) (err os.Error) {
+func (this *Document) LoadStream(r io.Reader) (err os.Error) {
 	var data []byte
 
 	t := bytes.NewBuffer(data)
@@ -222,7 +222,7 @@ func (this *Document) SaveString() (s string, err os.Error) {
 	return
 }
 
-func (this *Document) SaveStream(w *io.Writer) (err os.Error) {
+func (this *Document) SaveStream(w io.Writer) (err os.Error) {
 	s, err := this.SaveString()
 	if err != nil {
 		return
