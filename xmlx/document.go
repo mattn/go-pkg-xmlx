@@ -183,20 +183,17 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 }
 
 func (this *Document) LoadStream(r io.Reader) (err os.Error) {
-	var data []byte
-
-	t := bytes.NewBuffer(data)
+	var buf bytes.Buffer
 	s := make([]byte, 1024)
 
 	for {
-		_, err := r.Read(s)
-		if err != nil {
+		if _, err = r.Read(s); err != nil {
 			break
 		}
-		t.Write(s)
+		buf.Write(s)
 	}
 
-	err = this.LoadString(t.String())
+	err = this.LoadString(buf.String())
 	return
 }
 

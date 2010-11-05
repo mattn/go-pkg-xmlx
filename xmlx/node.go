@@ -249,14 +249,7 @@ func (this *Node) SelectNodes(namespace, name string) []*Node {
 
 func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
 	if cn.Name.Space == namespace && cn.Name.Local == name {
-		l := len(*list)
-		if l >= cap(*list) {
-			c := make([]*Node, l, l+16)
-			copy(c, *list)
-			*list = c
-		}
-		*list = (*list)[0 : l+1]
-		(*list)[l] = cn
+		*list = append(*list, cn)
 		return
 	}
 
@@ -361,16 +354,7 @@ func (this *Node) AddChild(t *Node) {
 		t.Parent.RemoveChild(t)
 	}
 	t.Parent = this
-
-	l := len(this.Children)
-	if l >= cap(this.Children) {
-		c := make([]*Node, l, l+10)
-		copy(c, this.Children)
-		this.Children = c
-	}
-
-	this.Children = this.Children[0 : l+1]
-	this.Children[l] = t
+	this.Children = append(this.Children, t)
 }
 
 // Remove a child node
