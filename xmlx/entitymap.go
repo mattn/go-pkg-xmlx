@@ -49,7 +49,7 @@ func EntityToUtf8(entity string) string {
 	}
 
 	var arr [4]byte
-	if size := utf8.EncodeRune(num, arr[0:]); size == 0 {
+	if size := utf8.EncodeRune(arr[0:], num); size == 0 {
 		return "&amp;#" + entity + ";"
 	}
 
