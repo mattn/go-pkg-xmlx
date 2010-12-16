@@ -166,8 +166,8 @@ func (this *Document) LoadFile(filename string) (err os.Error) {
 }
 
 func (this *Document) LoadUri(uri string) (err os.Error) {
-	r, _, err := http.Get(uri)
-	if err != nil {
+	var r *http.Response
+	if r, _, err = http.Get(uri); err != nil {
 		return
 	}
 
@@ -178,8 +178,7 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 		return
 	}
 
-	err = this.LoadString(string(b))
-	return
+	return this.LoadString(string(b))
 }
 
 func (this *Document) LoadStream(r io.Reader) (err os.Error) {
@@ -193,8 +192,7 @@ func (this *Document) LoadStream(r io.Reader) (err os.Error) {
 		buf.Write(s)
 	}
 
-	err = this.LoadString(buf.String())
-	return
+	return this.LoadString(buf.String())
 }
 
 // *****************************************************************************
@@ -220,10 +218,10 @@ func (this *Document) SaveString() (s string, err os.Error) {
 }
 
 func (this *Document) SaveStream(w io.Writer) (err os.Error) {
-	s, err := this.SaveString()
-	if err != nil {
+	var s string
+	if s, err = this.SaveString(); err != nil {
 		return
 	}
-	w.Write([]byte(s))
+	_, err = w.Write([]byte(s))
 	return
 }
