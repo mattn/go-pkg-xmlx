@@ -53,86 +53,119 @@ func (this *Node) Unmarshal(obj interface{}) os.Error {
 }
 
 // Get node value as string
-func (this *Node) GetValue(namespace, name string) string {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil {
-		return ""
+func (this *Node) S(namespace, name string) string {
+	if node := rec_SelectNode(this, namespace, name); node != nil {
+		return node.Value
 	}
-	return node.Value
+	return ""
 }
+
+// Deprecated - use Node.S()
+func (this *Node) GetValue(namespace, name string) string { return this.S(namespace, name) }
+
 
 // Get node value as int
-func (this *Node) GetValuei(namespace, name string) int {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) I(namespace, name string) int {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atoi(node.Value)
+		return n
 	}
-	n, _ := strconv.Atoi(node.Value)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.I()
+func (this *Node) GetValuei(namespace, name string) int { return this.I(namespace, name) }
+
 
 // Get node value as int64
-func (this *Node) GetValuei64(namespace, name string) int64 {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) I64(namespace, name string) int64 {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atoi64(node.Value)
+		return n
 	}
-	n, _ := strconv.Atoi64(node.Value)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.I64()
+func (this *Node) GetValuei64(namespace, name string) int64 { return this.I64(namespace, name) }
+
 
 // Get node value as uint
-func (this *Node) GetValueui(namespace, name string) uint {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) U(namespace, name string) uint {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atoui(node.Value)
+		return n
 	}
-	n, _ := strconv.Atoui(node.Value)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.U()
+func (this *Node) GetValueui(namespace, name string) uint { return this.U(namespace, name) }
+
 
 // Get node value as uint64
-func (this *Node) GetValueui64(namespace, name string) uint64 {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) U64(namespace, name string) uint64 {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atoui64(node.Value)
+		return n
 	}
-	n, _ := strconv.Atoui64(node.Value)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.U64()
+func (this *Node) GetValueui64(namespace, name string) uint64 { return this.U64(namespace, name) }
+
 
 // Get node value as float
-func (this *Node) GetValuef(namespace, name string) float {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) F(namespace, name string) float {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atof(node.Value)
+		return n
 	}
-	n, _ := strconv.Atof(node.Value)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.F()
+func (this *Node) GetValuef(namespace, name string) float { return this.F(namespace, name) }
+
 
 // Get node value as float32
-func (this *Node) GetValuef32(namespace, name string) float32 {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) F32(namespace, name string) float32 {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atof32(node.Value)
+		return n
 	}
-	n, _ := strconv.Atof32(node.Value)
-	return n
+	return 0
 }
 
+// Deprecated - use Node.F32()
+func (this *Node) GetValuef32(namespace, name string) float32 { return this.F32(namespace, name) }
+
+
 // Get node value as float64
-func (this *Node) GetValuef64(namespace, name string) float64 {
-	node := rec_SelectNode(this, namespace, name)
-	if node == nil || node.Value == "" {
-		return 0
+func (this *Node) F64(namespace, name string) float64 {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atof64(node.Value)
+		return n
 	}
-	n, _ := strconv.Atof64(node.Value)
-	return n
+	return 0
+}
+
+// Deprecated - use Node.F64()
+func (this *Node) GetValuef64(namespace, name string) float64 { return this.F64(namespace, name) }
+
+
+// Get node value as bool
+func (this *Node) B(namespace, name string) bool {
+	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
+		n, _ := strconv.Atob(node.Value)
+		return n
+	}
+	return false
 }
 
 // Get attribute value as string
-func (this *Node) GetAttr(namespace, name string) string {
+func (this *Node) As(namespace, name string) string {
 	for _, v := range this.Attributes {
 		if namespace == v.Name.Space && name == v.Name.Local {
 			return v.Value
@@ -141,75 +174,109 @@ func (this *Node) GetAttr(namespace, name string) string {
 	return ""
 }
 
+// Deprecated - use Node.As()
+func (this *Node) GetAttr(namespace, name string) string { return this.As(namespace, name) }
+
+
 // Get attribute value as int
-func (this *Node) GetAttri(namespace, name string) int {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Ai(namespace, name string) int {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atoi(s)
+		return n
 	}
-	n, _ := strconv.Atoi(s)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.Ai()
+func (this *Node) GetAttri(namespace, name string) int { return this.Ai(namespace, name) }
+
 
 // Get attribute value as uint
-func (this *Node) GetAttrui(namespace, name string) uint {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Au(namespace, name string) uint {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atoui(s)
+		return n
 	}
-	n, _ := strconv.Atoui(s)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.Au()
+func (this *Node) GetAttrui(namespace, name string) uint { return this.Au(namespace, name) }
+
 
 // Get attribute value as uint64
-func (this *Node) GetAttrui64(namespace, name string) uint64 {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Au64(namespace, name string) uint64 {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atoui64(s)
+		return n
 	}
-	n, _ := strconv.Atoui64(s)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.Au64()
+func (this *Node) GetAttrui64(namespace, name string) uint64 { return this.Au64(namespace, name) }
+
 
 // Get attribute value as int64
-func (this *Node) GetAttri64(namespace, name string) int64 {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Ai64(namespace, name string) int64 {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atoi64(s)
+		return n
 	}
-	n, _ := strconv.Atoi64(s)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.Ai64()
+func (this *Node) GetAttri64(namespace, name string) int64 { return this.Ai64(namespace, name) }
+
 
 // Get attribute value as float
-func (this *Node) GetAttrf(namespace, name string) float {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Af(namespace, name string) float {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atof(s)
+		return n
 	}
-	n, _ := strconv.Atof(s)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.Af()
+func (this *Node) GetAttrf(namespace, name string) float { return this.Af(namespace, name) }
+
 
 // Get attribute value as float32
-func (this *Node) GetAttrf32(namespace, name string) float32 {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Af32(namespace, name string) float32 {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atof32(s)
+		return n
 	}
-	n, _ := strconv.Atof32(s)
-	return n
+	return 0
 }
 
+// Deprecated - use Node.Af32()
+func (this *Node) GetAttrf32(namespace, name string) float32 { return this.Af32(namespace, name) }
+
 // Get attribute value as float64
-func (this *Node) GetAttrf64(namespace, name string) float64 {
-	s := this.GetAttr(namespace, name)
-	if s == "" {
-		return 0
+func (this *Node) Af64(namespace, name string) float64 {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atof64(s)
+		return n
 	}
-	n, _ := strconv.Atof64(s)
-	return n
+	return 0
 }
+
+// Deprecated - use Node.Af64()
+func (this *Node) GetAttrf64(namespace, name string) float64 { return this.Af64(namespace, name) }
+
+
+// Get attribute value as bool
+func (this *Node) Ab(namespace, name string) bool {
+	if s := this.As(namespace, name); s != "" {
+		n, _ := strconv.Atob(s)
+		return n
+	}
+	return false
+}
+
 
 // Returns true if this node has the specified attribute. False otherwise.
 func (this *Node) HasAttr(namespace, name string) bool {

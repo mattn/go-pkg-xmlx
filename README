@@ -37,19 +37,22 @@
 
  Each node exposes also a number of functions which allow easy access to a node
  value or an attribute value. They come in various forms to allow transparent
- conversion to types like int, int64, float, float32, float64, etc:
+ conversion to types: int, int64, uint, uint64, float, float32, float64:
 
-   *node.GetValue(ns, name string) string;
-   *node.GetValuei(ns, name string) int;
-   *node.GetValuei64(ns, name string) int64;
-   *node.GetValuef(ns, name string) float;
-   *node.GetValuef32(ns, name string) float32;
-   *node.GetValuef64(ns, name string) float64;
+   *node.S(ns, name string) string
+   *node.I(ns, name string) int
+   *node.I64(ns, name string) int64
+   *node.U(ns, name string) uint
+   *node.U64(ns, name string) uint64
+   *node.F(ns, name string) float
+   *node.F32(ns, name string) float32
+   *node.F64(ns, name string) float64
+   *node.B(namespace, name string) bool
 
- Note that the GetValue() functions actually consider child nodes for matching 
- names as well as the current node. In effect they first perform a 
- node.SelectNode() and then return the value of the resulting node converted to
- the appripriate type. This allows you to do this:
+ Note that these functions actually consider child nodes for matching names as
+ well as the current node. In effect they first perform a node.SelectNode() and
+ then return the value of the resulting node converted to the appropriate type.
+ This allows you to do this:
 
     Consider this piece of xml:
       <car>
@@ -58,23 +61,26 @@
       </car>
 
     Now this code:
-      node := doc.SelectNode("", "car");
-      brand := node.GetValue("", "brand");
+      node := doc.SelectNode("", "car")
+      brand := node.S("", "brand")
 
     Eventhough 'brand' is not the name of @node, we still get the right value
-    back (BMW), because GetValue searches through the child nodes when looking
+    back (BMW), because node.S() searches through the child nodes when looking
     for the value if the current node does not match the given namespace and
     name.
 
  For attributes, we only go through the attributes of the current node this
  function is invoked on:
 
-   *node.GetAttr(ns, name string) string;
-   *node.GetAttri(ns, name string) int;
-   *node.GetAttri64(ns, name string) int64;
-   *node.GetAttrf(ns, name string) float;
-   *node.GetAttrf32(ns, name string) float32;
-   *node.GetAttrf64(ns, name string) float64;
+   *node.As(ns, name string) string
+   *node.Ai(ns, name string) int
+   *node.Ai64(ns, name string) int64
+   *node.Au(ns, name string) uint
+   *node.Au64(ns, name string) uint64
+   *node.Af(ns, name string) float
+   *node.Af32(ns, name string) float32
+   *node.Af64(ns, name string) float64
+   *node.Ab(namespace, name string) bool
 
  All of these functions return either "" or 0 when the specified node or
  attribute could not be found. No errors are generated.
