@@ -30,7 +30,6 @@ package xmlx
 
 import "os"
 import "io"
-import "bytes"
 import "io/ioutil"
 import "path"
 import "strings"
@@ -182,17 +181,11 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 }
 
 func (this *Document) LoadStream(r io.Reader) (err os.Error) {
-	var buf bytes.Buffer
-	s := make([]byte, 1024)
-
-	for {
-		if _, err = r.Read(s); err != nil {
-			break
-		}
-		buf.Write(s)
+	var b []byte
+	if b, err = ioutil.ReadAll(r); err != nil {
+		return
 	}
-
-	return this.LoadString(buf.String())
+	return this.LoadString(string(b))
 }
 
 // *****************************************************************************

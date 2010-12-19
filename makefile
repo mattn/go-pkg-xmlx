@@ -7,6 +7,5 @@ test:
 
 clean:
 	make -C xmlx clean
-
-format:
 	gofmt -w .
+
