@@ -1,41 +1,40 @@
+// Copyright (c) 2010, Jim Teeuwen. All rights reserved.
+// This code is subject to a 1-clause BSD license.
+// The contents of which can be found in the LICENSE file.
+
 /*
-Copyright (c) 2010, Jim Teeuwen.
-All rights reserved.
-
-This code is subject to a 1-clause BSD license.
-The contents of which can be found in the LICENSE file.
-
-
  This package wraps the standard XML library and uses it to build a node tree of
  any document you load. This allows you to look up nodes forwards and backwards,
- as well as perform search queries (no xpath support yet).
+ as well as perform simple search queries.
 
  Nodes now simply become collections and don't require you to read them in the
  order in which the xml.Parser finds them.
 
- The Document currently implements 2 simple search functions which allow you to
+ The Document currently implements 2 search functions which allow you to
  look for specific nodes.
 
-   Document.SelectNode(namespace, name string) *Node;
-   Document.SelectNodes(namespace, name string) []*Node;
+   *xmlx.Document.SelectNode(namespace, name string) *Node;
+   *xmlx.Document.SelectNodes(namespace, name string) []*Node;
 
  SelectNode() returns the first, single node it finds matching the given name
  and namespace. SelectNodes() returns a slice containing all the matching nodes.
 
  Note that these search functions can be invoked on individual nodes as well.
  This allows you to search only a subset of the entire document.
-
 */
 package xmlx
 
-import "os"
-import "io"
-import "io/ioutil"
-import "path"
-import "strings"
-import "xml"
-import "fmt"
-import "http"
+import (
+	"os"
+	"io"
+	"io/ioutil"
+	"path"
+	"strings"
+	"xml"
+	"fmt"
+	"http"
+	"iconv"
+)
 
 type Document struct {
 	Version     string
@@ -82,6 +81,12 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 // *** Satisfy ILoader interface
 // *****************************************************************************
 func (this *Document) LoadString(s string) (err os.Error) {
+	// Ensure we are passing UTF-8 encoding content to the XML tokenizer.
+	if s, err = this.correctEncoding(s); err != nil {
+		return
+	}
+
+	// tokenize data
 	xp := xml.NewParser(strings.NewReader(s))
 	xp.Entity = this.Entity
 
@@ -217,4 +222,49 @@ func (this *Document) SaveStream(w io.Writer) (err os.Error) {
 	}
 	_, err = w.Write([]byte(s))
 	return
+}
+
+// Use libiconv to ensure we get UTF-8 encoded data. The Go Xml tokenizer will
+// throw a tantrum if we give it anything else.
+func (this *Document) correctEncoding(data string) (ret string, err os.Error) {
+	var cd *iconv.Iconv
+	var tok xml.Token
+
+	enc := "utf-8"
+	xp := xml.NewParser(strings.NewReader(data))
+	xp.Entity = this.Entity
+
+loop:
+	for {
+		if tok, err = xp.Token(); err != nil {
+			if err == os.EOF {
+				break loop
+			}
+			return "", err
+		}
+
+		switch tt := tok.(type) {
+		case xml.ProcInst:
+			if tt.Target == "xml" { // xml doctype
+				enc = strings.ToLower(string(tt.Inst))
+				if i := strings.Index(enc, `encoding="`); i > -1 {
+					enc = enc[i+len(`encoding="`):]
+					i = strings.Index(enc, `"`)
+					enc = enc[:i]
+					break loop
+				}
+			}
+		}
+	}
+
+	if enc == "utf-8" {
+		return data, nil
+	}
+
+	if cd, err = iconv.Open("utf-8", enc); err != nil {
+		return
+	}
+
+	defer cd.Close()
+	return cd.Conv(data)
 }

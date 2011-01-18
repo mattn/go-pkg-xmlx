@@ -1,11 +1,6 @@
-/*
-Copyright (c) 2010, Jim Teeuwen.
-All rights reserved.
-
-This code is subject to a 1-clause BSD license.
-The contents of which can be found in the LICENSE file.
-*/
-
+// Copyright (c) 2010, Jim Teeuwen. All rights reserved.
+// This code is subject to a 1-clause BSD license.
+// The contents of which can be found in the LICENSE file.
 package xmlx
 
 /*
@@ -20,11 +15,13 @@ package xmlx
 	"&acirc;" (â) is not the same as "&Acirc;" (Â).
 */
 
-import "os"
-import "fmt"
-import "utf8"
-import "regexp"
-import "strconv"
+import (
+	"os"
+	"fmt"
+	"utf8"
+	"regexp"
+	"strconv"
+)
 
 var reg_entnumeric = regexp.MustCompile("^&#[0-9]+;$")
 var reg_entnamed = regexp.MustCompile("^&[a-zA-Z]+;$")

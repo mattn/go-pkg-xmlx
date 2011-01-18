@@ -14,7 +14,7 @@ func TestLoadLocal(t *testing.T) {
 	doc := New()
 
 	if err := doc.LoadFile("test.xml"); err != nil {
-		t.Errorf("%s", err)
+		t.Error(err.String())
 		return
 	}
 
@@ -24,11 +24,11 @@ func TestLoadLocal(t *testing.T) {
 	}
 }
 
-func _TestLoadRemote(t *testing.T) {
+func TestLoadRemote(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadUri("http://www.w3schools.com/xml/plant_catalog.xml"); err != nil {
-		t.Errorf("%s", err)
+	if err := doc.LoadUri("http://rss.cnn.com/rss/cnn_latest.rss"); err != nil {
+		t.Error(err.String())
 		return
 	}
 

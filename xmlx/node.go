@@ -8,12 +8,14 @@ The contents of which can be found in the LICENSE file.
 
 package xmlx
 
-import "os"
-import "strings"
-import "xml"
-import "bytes"
-import "fmt"
-import "strconv"
+import (
+	"os"
+	"strings"
+	"xml"
+	"bytes"
+	"fmt"
+	"strconv"
+)
 
 const (
 	NT_ROOT = iota
