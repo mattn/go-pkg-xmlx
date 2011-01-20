@@ -33,7 +33,7 @@ import (
 	"xml"
 	"fmt"
 	"http"
-	"iconv"
+	iconv "github.com/sloonz/go-iconv/src"
 )
 
 type Document struct {

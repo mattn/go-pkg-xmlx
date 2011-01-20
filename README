@@ -1,5 +1,5 @@
 
- Author: Jim Teeuwen <jimteeuwen@gmail.com>
+ Author: Jim Teeuwen <jimteeuwen at gmail.com>
 
  This package wraps the standard XML library and uses it to build a node tree of
  any document you load. This allows you to look up nodes forwards and backwards,
@@ -12,7 +12,7 @@
  DEPENDENCIES
 ================================================================================
 
- go-iconv: https://github.com/sloonz/go-iconv
+ goinstall github.com/sloonz/go-iconv/src
 
 ================================================================================
  USAGE
