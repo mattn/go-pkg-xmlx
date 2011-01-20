@@ -117,20 +117,6 @@ func (this *Node) U64(namespace, name string) uint64 {
 // Deprecated - use Node.U64()
 func (this *Node) GetValueui64(namespace, name string) uint64 { return this.U64(namespace, name) }
 
-
-// Get node value as float
-func (this *Node) F(namespace, name string) float {
-	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atof(node.Value)
-		return n
-	}
-	return 0
-}
-
-// Deprecated - use Node.F()
-func (this *Node) GetValuef(namespace, name string) float { return this.F(namespace, name) }
-
-
 // Get node value as float32
 func (this *Node) F32(namespace, name string) float32 {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
@@ -230,20 +216,6 @@ func (this *Node) Ai64(namespace, name string) int64 {
 
 // Deprecated - use Node.Ai64()
 func (this *Node) GetAttri64(namespace, name string) int64 { return this.Ai64(namespace, name) }
-
-
-// Get attribute value as float
-func (this *Node) Af(namespace, name string) float {
-	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atof(s)
-		return n
-	}
-	return 0
-}
-
-// Deprecated - use Node.Af()
-func (this *Node) GetAttrf(namespace, name string) float { return this.Af(namespace, name) }
-
 
 // Get attribute value as float32
 func (this *Node) Af32(namespace, name string) float32 {
