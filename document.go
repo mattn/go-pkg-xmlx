@@ -240,24 +240,34 @@ loop:
 			if err == os.EOF {
 				break loop
 			}
+			
 			return "", err
 		}
 
 		switch tt := tok.(type) {
 		case xml.ProcInst:
 			if tt.Target == "xml" { // xml doctype
-				enc = strings.ToLower(string(tt.Inst))
-				if i := strings.Index(enc, `encoding="`); i > -1 {
-					enc = enc[i+len(`encoding="`):]
-					i = strings.Index(enc, `"`)
-					enc = enc[:i]
-					break loop
+				var pair []string
+				var entry string
+
+				list := strings.Split(string(tt.Inst), " ", -1)
+				for _, entry = range list {
+					if pair = strings.Split(entry, "=", -1); len(pair) < 2 {
+						continue
+					}
+
+					switch pair[0] {
+					case "encoding":
+						enc = pair[1][1:len(pair[1])-1]
+						break loop
+					}
 				}
 			}
 		}
 	}
 
 	if enc == "utf-8" {
+		// Data already in utf-8 format. Nothing to do here.
 		return data, nil
 	}
 

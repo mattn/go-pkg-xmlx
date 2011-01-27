@@ -20,10 +20,11 @@
 
  Getting the package up and running is simple enough:
  
- $ cd /path/to/code/dir
- $ git clone http://github.com/jteeuwen/go-pkg-xmlx.git
- $ cd go-pkg-xmlx
- $ make
+    $ goinstall github.com/jteeuwen/go-pkg-xmlx
+
+ Using it:
+
+    import xmlx "github.com/jteeuwen/go-pkg-xmlx"
 
 ================================================================================
  API

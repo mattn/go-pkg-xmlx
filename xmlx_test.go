@@ -27,7 +27,7 @@ func TestLoadLocal(t *testing.T) {
 func TestLoadRemote(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadUri("http://rss.cnn.com/rss/cnn_latest.rss"); err != nil {
+	if err := doc.LoadUri("http://blog.golang.org/feeds/posts/default"); err != nil {
 		t.Error(err.String())
 		return
 	}
