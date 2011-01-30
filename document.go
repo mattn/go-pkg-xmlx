@@ -266,7 +266,7 @@ loop:
 		}
 	}
 
-	if enc == "utf-8" {
+	if strings.ToLower(enc) == "utf-8" {
 		// Data already in utf-8 format. Nothing to do here.
 		return data, nil
 	}
