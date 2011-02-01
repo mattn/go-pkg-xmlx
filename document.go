@@ -240,7 +240,7 @@ loop:
 			if err == os.EOF {
 				break loop
 			}
-			
+
 			return "", err
 		}
 
@@ -258,7 +258,7 @@ loop:
 
 					switch pair[0] {
 					case "encoding":
-						enc = pair[1][1:len(pair[1])-1]
+						enc = pair[1][1 : len(pair[1])-1]
 						break loop
 					}
 				}

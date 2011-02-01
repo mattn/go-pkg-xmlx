@@ -155,7 +155,7 @@ func (this *Node) B(namespace, name string) bool {
 // Get attribute value as string
 func (this *Node) As(namespace, name string) string {
 	for _, v := range this.Attributes {
-		if namespace == v.Name.Space && name == v.Name.Local {
+		if (namespace == "*" || namespace == v.Name.Space) && name == v.Name.Local {
 			return v.Value
 		}
 	}
@@ -251,11 +251,10 @@ func (this *Node) Ab(namespace, name string) bool {
 	return false
 }
 
-
 // Returns true if this node has the specified attribute. False otherwise.
 func (this *Node) HasAttr(namespace, name string) bool {
 	for _, v := range this.Attributes {
-		if namespace == v.Name.Space && name == v.Name.Local {
+		if (namespace == "*" || namespace == v.Name.Space) && name == v.Name.Local {
 			return true
 		}
 	}
@@ -268,7 +267,9 @@ func (this *Node) SelectNode(namespace, name string) *Node {
 }
 
 func rec_SelectNode(cn *Node, namespace, name string) *Node {
-	if cn.Name.Space == namespace && cn.Name.Local == name {
+	// Allow wildcard for namespace names. Meaning we will match any namespace
+	// name with a matching local name.
+	if (namespace == "*" || cn.Name.Space == namespace) && cn.Name.Local == name {
 		return cn
 	}
 
@@ -289,7 +290,9 @@ func (this *Node) SelectNodes(namespace, name string) []*Node {
 }
 
 func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
-	if cn.Name.Space == namespace && cn.Name.Local == name {
+	// Allow wildcard for namespace names. Meaning we will match any namespace
+	// name with a matching local name.
+	if (namespace == "*" || cn.Name.Space == namespace) && cn.Name.Local == name {
 		*list = append(*list, cn)
 		return
 	}
