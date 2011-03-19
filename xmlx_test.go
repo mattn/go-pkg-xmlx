@@ -1,10 +1,6 @@
-/*
-Copyright (c) 2010, Jim Teeuwen.
-All rights reserved.
-
-This code is subject to a 1-clause BSD license.
-The contents of which can be found in the LICENSE file.
-*/
+// This work is subject to the CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+// license. Its contents can be found at:
+// http://creativecommons.org/publicdomain/zero/1.0/
 
 package xmlx
 
