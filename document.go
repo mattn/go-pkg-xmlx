@@ -28,24 +28,26 @@ import (
 	"os"
 	"io"
 	"io/ioutil"
-	"path"
 	"strings"
+	"bytes"
 	"xml"
 	"fmt"
 	"http"
-	iconv "github.com/sloonz/go-iconv/src"
+	"go-charset.googlecode.com/hg/charset"
 )
 
+// represents a single XML document.
 type Document struct {
-	Version     string
-	Encoding    string
-	StandAlone  string
-	SaveDocType bool
-	Root        *Node
-	Entity      map[string]string
-	Verbose     bool
+	Version     string            // XML version
+	Encoding    string            // Encoding found in document. If absent, assumes UTF-8.
+	StandAlone  string            // Value of XML doctype's 'standalone' attribute.
+	SaveDocType bool              // Whether not to include the XML doctype in saves.
+	Root        *Node             // The document's root node.
+	Entity      map[string]string // Mapping of custom entity conversions.
+	Verbose     bool              // [depracated] Not actually used anymore.
 }
 
+// Create a new, empty XML document instance.
 func New() *Document {
 	return &Document{
 		Version:     "1.0",
@@ -53,7 +55,6 @@ func New() *Document {
 		StandAlone:  "yes",
 		SaveDocType: true,
 		Entity:      make(map[string]string),
-		Verbose:     false,
 	}
 }
 
@@ -64,49 +65,37 @@ func New() *Document {
 // defined on http://www.w3.org/TR/html4/sgml/entities.html
 func (this *Document) LoadExtendedEntityMap() { loadNonStandardEntities(this.Entity) }
 
-func (this *Document) String() string {
-	s, _ := this.SaveString()
-	return s
-}
-
+// Select a single node with the given namespace and name. Returns nil if no
+// matching node was found.
 func (this *Document) SelectNode(namespace, name string) *Node {
 	return this.Root.SelectNode(namespace, name)
 }
 
+// Select all nodes with the given namespace and name. Returns an empty slice
+// if no matches were found.
 func (this *Document) SelectNodes(namespace, name string) []*Node {
 	return this.Root.SelectNodes(namespace, name)
 }
 
-// *****************************************************************************
-// *** Satisfy ILoader interface
-// *****************************************************************************
-func (this *Document) LoadString(s string) (err os.Error) {
-	// Ensure we are passing UTF-8 encoding content to the XML tokenizer.
-	if s, err = this.correctEncoding(s); err != nil {
-		return
-	}
-
-	// tokenize data
-	xp := xml.NewParser(strings.NewReader(s))
+// Load the contents of this document from the supplied reader.
+func (this *Document) LoadStream(r io.Reader) (err os.Error) {
+	xp := xml.NewParser(r)
 	xp.Entity = this.Entity
+	xp.CharsetReader = func(enc string, input io.Reader) (io.Reader, os.Error) {
+		return charset.NewReader(enc, input)
+	}
 
 	this.Root = NewNode(NT_ROOT)
 	ct := this.Root
 
 	var tok xml.Token
 	var t *Node
-	var i int
 	var doctype string
-	var v xml.Attr
 
 	for {
 		if tok, err = xp.Token(); err != nil {
 			if err == os.EOF {
 				return nil
-			}
-
-			if this.Verbose {
-				fmt.Fprintf(os.Stderr, "Xml Error: %s\n", err)
 			}
 			return err
 		}
@@ -128,7 +117,7 @@ func (this *Document) LoadString(s string) (err os.Error) {
 			t = NewNode(NT_ELEMENT)
 			t.Name = tt.Name
 			t.Attributes = make([]*Attr, len(tt.Attr))
-			for i, v = range tt.Attr {
+			for i, v := range tt.Attr {
 				t.Attributes[i] = new(Attr)
 				t.Attributes[i].Name = v.Name
 				t.Attributes[i].Value = v.Value
@@ -138,7 +127,7 @@ func (this *Document) LoadString(s string) (err os.Error) {
 		case xml.ProcInst:
 			if tt.Target == "xml" { // xml doctype
 				doctype = strings.TrimSpace(string(tt.Inst))
-				if i = strings.Index(doctype, `standalone="`); i > -1 {
+				if i := strings.Index(doctype, `standalone="`); i > -1 {
 					this.StandAlone = doctype[i+len(`standalone="`) : len(doctype)]
 					i = strings.Index(this.StandAlone, `"`)
 					this.StandAlone = this.StandAlone[0:i]
@@ -159,16 +148,28 @@ func (this *Document) LoadString(s string) (err os.Error) {
 	return
 }
 
-func (this *Document) LoadFile(filename string) (err os.Error) {
-	var data []byte
+// Load the contents of this document from the supplied byte slice.
+func (this *Document) LoadBytes(d []byte) (err os.Error) {
+	return this.LoadStream(bytes.NewBuffer(d))
+}
 
-	if data, err = ioutil.ReadFile(path.Clean(filename)); err != nil {
+// Load the contents of this document from the supplied string.
+func (this *Document) LoadString(s string) (err os.Error) {
+	return this.LoadStream(strings.NewReader(s))
+}
+
+// Load the contents of this document from the supplied file.
+func (this *Document) LoadFile(filename string) (err os.Error) {
+	var fd *os.File
+	if fd, err = os.Open(filename); err != nil {
 		return
 	}
 
-	return this.LoadString(string(data))
+	defer fd.Close()
+	return this.LoadStream(fd)
 }
 
+// Load the contents of this document from the supplied uri.
 func (this *Document) LoadUri(uri string) (err os.Error) {
 	var r *http.Response
 	if r, _, err = http.Get(uri); err != nil {
@@ -176,105 +177,36 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 	}
 
 	defer r.Body.Close()
-
-	var b []byte
-	if b, err = ioutil.ReadAll(r.Body); err != nil {
-		return
-	}
-
-	return this.LoadString(string(b))
+	return this.LoadStream(r.Body)
 }
 
-func (this *Document) LoadStream(r io.Reader) (err os.Error) {
-	var b []byte
-	if b, err = ioutil.ReadAll(r); err != nil {
-		return
-	}
-	return this.LoadString(string(b))
+// Save the contents of this document to the supplied file.
+func (this *Document) SaveFile(path string) os.Error {
+	return ioutil.WriteFile(path, this.SaveBytes(), 0600)
 }
 
-// *****************************************************************************
-// *** Satisfy ISaver interface
-// *****************************************************************************
-func (this *Document) SaveFile(path string) (err os.Error) {
-	var data string
-	if data, err = this.SaveString(); err != nil {
-		return
-	}
+// Save the contents of this document as a byte slice.
+func (this *Document) SaveBytes() []byte {
+	var b bytes.Buffer
 
-	return ioutil.WriteFile(path, []byte(data), 0600)
-}
-
-func (this *Document) SaveString() (s string, err os.Error) {
 	if this.SaveDocType {
-		s = fmt.Sprintf(`<?xml version="%s" encoding="%s" standalone="%s"?>`,
-			this.Version, this.Encoding, this.StandAlone)
+		b.WriteString(fmt.Sprintf(`<?xml version="%s" encoding="%s" standalone="%s"?>`,
+			this.Version, this.Encoding, this.StandAlone))
 	}
 
-	s += this.Root.String()
-	return
+	b.Write(this.Root.Bytes())
+	return b.Bytes()
 }
 
+// Save the contents of this document as a string.
+func (this *Document) SaveString() string { return string(this.SaveBytes()) }
+
+// Alias for Document.SaveString(). This one is invoked by anything looking for
+// the standard String() method (eg: fmt.Printf("%s\n", mydoc).
+func (this *Document) String() string { return string(this.SaveBytes()) }
+
+// Save the contents of this document to the supplied writer.
 func (this *Document) SaveStream(w io.Writer) (err os.Error) {
-	var s string
-	if s, err = this.SaveString(); err != nil {
-		return
-	}
-	_, err = w.Write([]byte(s))
+	_, err = w.Write(this.SaveBytes())
 	return
-}
-
-// Use libiconv to ensure we get UTF-8 encoded data. The Go Xml tokenizer will
-// throw a tantrum if we give it anything else.
-func (this *Document) correctEncoding(data string) (ret string, err os.Error) {
-	var cd *iconv.Iconv
-	var tok xml.Token
-
-	enc := "utf-8"
-	xp := xml.NewParser(strings.NewReader(data))
-	xp.Entity = this.Entity
-
-loop:
-	for {
-		if tok, err = xp.Token(); err != nil {
-			if err == os.EOF {
-				break loop
-			}
-
-			return "", err
-		}
-
-		switch tt := tok.(type) {
-		case xml.ProcInst:
-			if tt.Target == "xml" { // xml doctype
-				var pair []string
-				var entry string
-
-				list := strings.Split(string(tt.Inst), " ", -1)
-				for _, entry = range list {
-					if pair = strings.Split(entry, "=", -1); len(pair) < 2 {
-						continue
-					}
-
-					switch pair[0] {
-					case "encoding":
-						enc = pair[1][1 : len(pair[1])-1]
-						break loop
-					}
-				}
-			}
-		}
-	}
-
-	if strings.ToLower(enc) == "utf-8" {
-		// Data already in utf-8 format. Nothing to do here.
-		return data, nil
-	}
-
-	if cd, err = iconv.Open("utf-8", enc); err != nil {
-		return
-	}
-
-	defer cd.Close()
-	return cd.Conv(data)
 }
