@@ -172,7 +172,7 @@ func (this *Document) LoadFile(filename string) (err os.Error) {
 // Load the contents of this document from the supplied uri.
 func (this *Document) LoadUri(uri string) (err os.Error) {
 	var r *http.Response
-	if r, _, err = http.Get(uri); err != nil {
+	if r, err = http.Get(uri); err != nil {
 		return
 	}
 
