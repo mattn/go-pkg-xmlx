@@ -20,7 +20,23 @@ func TestLoadLocal(t *testing.T) {
 	}
 }
 
-func TestLoadRemote(t *testing.T) {
+func TestWildcard(t *testing.T) {
+	doc := New()
+
+	if err := doc.LoadFile("test2.xml"); err != nil {
+		t.Error(err.String())
+		return
+	}
+
+	list := doc.SelectNodes("xdc", "*")
+
+	if len(list) != 8 {
+		t.Errorf("Wrong number of child elements. Expected 4, got %d.", len(list))
+		return
+	}
+}
+
+func _TestLoadRemote(t *testing.T) {
 	doc := New()
 
 	if err := doc.LoadUri("http://blog.golang.org/feeds/posts/default"); err != nil {

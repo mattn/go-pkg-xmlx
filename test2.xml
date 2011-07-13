@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<xml>
+ <books>
+  <book>
+   <xdc:author>moo</xdc:author>
+   <xdc:price>123</xdc:price>
+   <xdc:pages>321</xdc:pages>
+   <xdc:date>1/1/2011</xdc:date>
+  </book>
+  <book>
+   <xdc:author>moo</xdc:author>
+   <xdc:price>123</xdc:price>
+   <xdc:pages>321</xdc:pages>
+   <xdc:date>1/1/2011</xdc:date>
+  </book>
+ </books>
+</xml>

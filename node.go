@@ -196,10 +196,15 @@ func (this *Node) Ab(namespace, name string) bool {
 // Returns true if this node has the specified attribute. False otherwise.
 func (this *Node) HasAttr(namespace, name string) bool {
 	for _, v := range this.Attributes {
-		if (namespace == "*" || namespace == v.Name.Space) && name == v.Name.Local {
+		if namespace != "*" && namespace != v.Name.Space {
+			continue
+		}
+
+		if name == "*" || name == v.Name.Local {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -209,9 +214,7 @@ func (this *Node) SelectNode(namespace, name string) *Node {
 }
 
 func rec_SelectNode(cn *Node, namespace, name string) *Node {
-	// Allow wildcard for namespace names. Meaning we will match any namespace
-	// name with a matching local name.
-	if (namespace == "*" || cn.Name.Space == namespace) && cn.Name.Local == name {
+	if (namespace == "*" || cn.Name.Space == namespace) && (name == "*" || cn.Name.Local == name) {
 		return cn
 	}
 
@@ -221,6 +224,7 @@ func rec_SelectNode(cn *Node, namespace, name string) *Node {
 			return tn
 		}
 	}
+
 	return nil
 }
 
@@ -232,9 +236,7 @@ func (this *Node) SelectNodes(namespace, name string) []*Node {
 }
 
 func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
-	// Allow wildcard for namespace names. Meaning we will match any namespace
-	// name with a matching local name.
-	if (namespace == "*" || cn.Name.Space == namespace) && cn.Name.Local == name {
+	if (namespace == "*" || cn.Name.Space == namespace) && (name == "*" || cn.Name.Local == name) {
 		*list = append(*list, cn)
 		return
 	}
