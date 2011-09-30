@@ -28,9 +28,9 @@ func TestWildcard(t *testing.T) {
 		return
 	}
 
-	list := doc.SelectNodes("xdc", "*")
+	list := doc.SelectNodes("ns", "*")
 
-	if len(list) != 8 {
+	if len(list) != 1 {
 		t.Errorf("Wrong number of child elements. Expected 4, got %d.", len(list))
 		return
 	}
@@ -67,7 +67,7 @@ func TestSave(t *testing.T) {
 func TestNodeSearch(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadFile("test.xml"); err != nil {
+	if err := doc.LoadFile("test1.xml"); err != nil {
 		t.Errorf("LoadFile(): %s", err)
 		return
 	}
@@ -95,7 +95,7 @@ type Image struct {
 
 func TestUnmarshal(t *testing.T) {
 	doc := New()
-	err := doc.LoadFile("test.xml")
+	err := doc.LoadFile("test1.xml")
 
 	if err != nil {
 		t.Errorf("LoadFile(): %s", err)

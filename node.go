@@ -277,7 +277,7 @@ func (this *Node) String() (s string) {
 func (this *Node) printRoot() []byte {
 	var b bytes.Buffer
 	for _, v := range this.Children {
-		b.WriteString(v.String())
+		b.Write(v.Bytes())
 	}
 	return b.Bytes()
 }
@@ -323,7 +323,7 @@ func (this *Node) printElement() []byte {
 	b.WriteRune('>')
 
 	for _, v := range this.Children {
-		b.WriteString(v.String())
+		b.Write(v.Bytes())
 	}
 
 	b.WriteString(this.Value)
