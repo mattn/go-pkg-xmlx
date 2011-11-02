@@ -5,7 +5,6 @@
 package xmlx
 
 import (
-	"os"
 	"xml"
 	"bytes"
 	"fmt"
@@ -45,7 +44,7 @@ func NewNode(tid byte) *Node {
 
 // This wraps the standard xml.Unmarshal function and supplies this particular
 // node as the content to be unmarshalled.
-func (this *Node) Unmarshal(obj interface{}) os.Error {
+func (this *Node) Unmarshal(obj interface{}) error {
 	return xml.Unmarshal(bytes.NewBuffer(this.Bytes()), obj)
 }
 

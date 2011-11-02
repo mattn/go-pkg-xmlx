@@ -25,6 +25,7 @@
 package xmlx
 
 import (
+	"errors"
 	"os"
 	"io"
 	"io/ioutil"
@@ -78,10 +79,10 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 }
 
 // Load the contents of this document from the supplied reader.
-func (this *Document) LoadStream(r io.Reader) (err os.Error) {
+func (this *Document) LoadStream(r io.Reader) (err error) {
 	xp := xml.NewParser(r)
 	xp.Entity = this.Entity
-	xp.CharsetReader = func(enc string, input io.Reader) (io.Reader, os.Error) {
+	xp.CharsetReader = func(enc string, input io.Reader) (io.Reader, error) {
 		return charset.NewReader(enc, input)
 	}
 
@@ -94,7 +95,7 @@ func (this *Document) LoadStream(r io.Reader) (err os.Error) {
 
 	for {
 		if tok, err = xp.Token(); err != nil {
-			if err == os.EOF {
+			if err == io.EOF {
 				return nil
 			}
 			return err
@@ -102,7 +103,7 @@ func (this *Document) LoadStream(r io.Reader) (err os.Error) {
 
 		switch tt := tok.(type) {
 		case xml.SyntaxError:
-			return os.NewError(tt.String())
+			return errors.New(tt.Error())
 		case xml.CharData:
 			ct.Value = strings.TrimSpace(string([]byte(tt)))
 		case xml.Comment:
@@ -149,17 +150,17 @@ func (this *Document) LoadStream(r io.Reader) (err os.Error) {
 }
 
 // Load the contents of this document from the supplied byte slice.
-func (this *Document) LoadBytes(d []byte) (err os.Error) {
+func (this *Document) LoadBytes(d []byte) (err error) {
 	return this.LoadStream(bytes.NewBuffer(d))
 }
 
 // Load the contents of this document from the supplied string.
-func (this *Document) LoadString(s string) (err os.Error) {
+func (this *Document) LoadString(s string) (err error) {
 	return this.LoadStream(strings.NewReader(s))
 }
 
 // Load the contents of this document from the supplied file.
-func (this *Document) LoadFile(filename string) (err os.Error) {
+func (this *Document) LoadFile(filename string) (err error) {
 	var fd *os.File
 	if fd, err = os.Open(filename); err != nil {
 		return
@@ -170,7 +171,7 @@ func (this *Document) LoadFile(filename string) (err os.Error) {
 }
 
 // Load the contents of this document from the supplied uri.
-func (this *Document) LoadUri(uri string) (err os.Error) {
+func (this *Document) LoadUri(uri string) (err error) {
 	var r *http.Response
 	if r, err = http.Get(uri); err != nil {
 		return
@@ -181,7 +182,7 @@ func (this *Document) LoadUri(uri string) (err os.Error) {
 }
 
 // Save the contents of this document to the supplied file.
-func (this *Document) SaveFile(path string) os.Error {
+func (this *Document) SaveFile(path string) error {
 	return ioutil.WriteFile(path, this.SaveBytes(), 0600)
 }
 
@@ -206,7 +207,7 @@ func (this *Document) SaveString() string { return string(this.SaveBytes()) }
 func (this *Document) String() string { return string(this.SaveBytes()) }
 
 // Save the contents of this document to the supplied writer.
-func (this *Document) SaveStream(w io.Writer) (err os.Error) {
+func (this *Document) SaveStream(w io.Writer) (err error) {
 	_, err = w.Write(this.SaveBytes())
 	return
 }

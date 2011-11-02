@@ -10,7 +10,7 @@ func TestLoadLocal(t *testing.T) {
 	doc := New()
 
 	if err := doc.LoadFile("test.xml"); err != nil {
-		t.Error(err.String())
+		t.Error(err.Error())
 		return
 	}
 
@@ -24,7 +24,7 @@ func TestWildcard(t *testing.T) {
 	doc := New()
 
 	if err := doc.LoadFile("test2.xml"); err != nil {
-		t.Error(err.String())
+		t.Error(err.Error())
 		return
 	}
 
@@ -40,7 +40,7 @@ func _TestLoadRemote(t *testing.T) {
 	doc := New()
 
 	if err := doc.LoadUri("http://blog.golang.org/feeds/posts/default"); err != nil {
-		t.Error(err.String())
+		t.Error(err.Error())
 		return
 	}
 

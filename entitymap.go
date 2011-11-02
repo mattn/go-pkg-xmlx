@@ -17,7 +17,6 @@ package xmlx
 */
 
 import (
-	"os"
 	"fmt"
 	"utf8"
 	"regexp"
@@ -38,7 +37,7 @@ func EntityToUtf8(entity string) string {
 		return "&amp;" + entity[2:len(entity)-1] + ";"
 	}
 
-	var err os.Error
+	var err error
 	var num int
 
 	entity = entity[2 : len(entity)-1]
