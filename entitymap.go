@@ -18,9 +18,9 @@ package xmlx
 
 import (
 	"fmt"
-	"utf8"
 	"regexp"
 	"strconv"
+	"unicode/utf8"
 )
 
 var reg_entnumeric = regexp.MustCompile("^&#[0-9]+;$")

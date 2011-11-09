@@ -25,16 +25,16 @@
 package xmlx
 
 import (
+	"bytes"
+	"encoding/xml"
 	"errors"
-	"os"
+	"fmt"
+	"go-charset.googlecode.com/hg/charset"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"os"
 	"strings"
-	"bytes"
-	"xml"
-	"fmt"
-	"http"
-	"go-charset.googlecode.com/hg/charset"
 )
 
 // represents a single XML document.

@@ -5,8 +5,8 @@
 package xmlx
 
 import (
-	"xml"
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"strconv"
 )
