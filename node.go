@@ -68,7 +68,7 @@ func (this *Node) I(namespace, name string) int {
 // Get node value as int64
 func (this *Node) I64(namespace, name string) int64 {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atoi64(node.Value)
+		n, _ := strconv.ParseInt(node.Value, 10, 64)
 		return n
 	}
 	return 0
@@ -77,7 +77,7 @@ func (this *Node) I64(namespace, name string) int64 {
 // Get node value as uint
 func (this *Node) U(namespace, name string) uint {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atoui(node.Value)
+		n, _ := strconv.ParseUint(node.Value, 10, 0)
 		return n
 	}
 	return 0
@@ -86,7 +86,7 @@ func (this *Node) U(namespace, name string) uint {
 // Get node value as uint64
 func (this *Node) U64(namespace, name string) uint64 {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atoui64(node.Value)
+		n, _ := strconv.ParseUint(node.Value, 10, 64)
 		return n
 	}
 	return 0
@@ -95,7 +95,7 @@ func (this *Node) U64(namespace, name string) uint64 {
 // Get node value as float32
 func (this *Node) F32(namespace, name string) float32 {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atof32(node.Value)
+		n, _ := strconv.ParseFloat(node.Value, 32)
 		return n
 	}
 	return 0
@@ -104,7 +104,7 @@ func (this *Node) F32(namespace, name string) float32 {
 // Get node value as float64
 func (this *Node) F64(namespace, name string) float64 {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atof64(node.Value)
+		n, _ := strconv.ParseFloat(node.Value, 64)
 		return n
 	}
 	return 0
@@ -113,7 +113,7 @@ func (this *Node) F64(namespace, name string) float64 {
 // Get node value as bool
 func (this *Node) B(namespace, name string) bool {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
-		n, _ := strconv.Atob(node.Value)
+		n, _ := strconv.ParseBool(node.Value)
 		return n
 	}
 	return false
@@ -141,7 +141,7 @@ func (this *Node) Ai(namespace, name string) int {
 // Get attribute value as uint
 func (this *Node) Au(namespace, name string) uint {
 	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atoui(s)
+		n, _ := strconv.ParseUint(s, 10, 0)
 		return n
 	}
 	return 0
@@ -150,7 +150,7 @@ func (this *Node) Au(namespace, name string) uint {
 // Get attribute value as uint64
 func (this *Node) Au64(namespace, name string) uint64 {
 	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atoui64(s)
+		n, _ := strconv.ParseUint(s, 10, 64)
 		return n
 	}
 	return 0
@@ -159,7 +159,7 @@ func (this *Node) Au64(namespace, name string) uint64 {
 // Get attribute value as int64
 func (this *Node) Ai64(namespace, name string) int64 {
 	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atoi64(s)
+		n, _ := strconv.ParseInt(s, 10, 64)
 		return n
 	}
 	return 0
@@ -168,7 +168,7 @@ func (this *Node) Ai64(namespace, name string) int64 {
 // Get attribute value as float32
 func (this *Node) Af32(namespace, name string) float32 {
 	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atof32(s)
+		n, _ := strconv.ParseFloat(s, 32)
 		return n
 	}
 	return 0
@@ -177,7 +177,7 @@ func (this *Node) Af32(namespace, name string) float32 {
 // Get attribute value as float64
 func (this *Node) Af64(namespace, name string) float64 {
 	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atof64(s)
+		n, _ := strconv.ParseFloat(s, 64)
 		return n
 	}
 	return 0
@@ -186,7 +186,7 @@ func (this *Node) Af64(namespace, name string) float64 {
 // Get attribute value as bool
 func (this *Node) Ab(namespace, name string) bool {
 	if s := this.As(namespace, name); s != "" {
-		n, _ := strconv.Atob(s)
+		n, _ := strconv.ParseBool(s)
 		return n
 	}
 	return false
