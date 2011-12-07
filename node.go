@@ -78,7 +78,7 @@ func (this *Node) I64(namespace, name string) int64 {
 func (this *Node) U(namespace, name string) uint {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
 		n, _ := strconv.ParseUint(node.Value, 10, 0)
-		return n
+		return uint(n)
 	}
 	return 0
 }
@@ -96,7 +96,7 @@ func (this *Node) U64(namespace, name string) uint64 {
 func (this *Node) F32(namespace, name string) float32 {
 	if node := rec_SelectNode(this, namespace, name); node != nil && node.Value != "" {
 		n, _ := strconv.ParseFloat(node.Value, 32)
-		return n
+		return float32(n)
 	}
 	return 0
 }
@@ -142,7 +142,7 @@ func (this *Node) Ai(namespace, name string) int {
 func (this *Node) Au(namespace, name string) uint {
 	if s := this.As(namespace, name); s != "" {
 		n, _ := strconv.ParseUint(s, 10, 0)
-		return n
+		return uint(n)
 	}
 	return 0
 }
@@ -169,7 +169,7 @@ func (this *Node) Ai64(namespace, name string) int64 {
 func (this *Node) Af32(namespace, name string) float32 {
 	if s := this.As(namespace, name); s != "" {
 		n, _ := strconv.ParseFloat(s, 32)
-		return n
+		return float32(n)
 	}
 	return 0
 }
