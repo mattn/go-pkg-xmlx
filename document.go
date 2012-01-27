@@ -26,10 +26,10 @@ package xmlx
 
 import (
 	"bytes"
+	"code.google.com/p/go-charset/charset"
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"go-charset.googlecode.com/hg/charset"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -80,7 +80,7 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 
 // Load the contents of this document from the supplied reader.
 func (this *Document) LoadStream(r io.Reader) (err error) {
-	xp := xml.NewParser(r)
+	xp := xml.NewDecoder(r)
 	xp.Entity = this.Entity
 	xp.CharsetReader = func(enc string, input io.Reader) (io.Reader, error) {
 		return charset.NewReader(enc, input)
