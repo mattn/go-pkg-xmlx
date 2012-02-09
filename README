@@ -12,20 +12,7 @@
  DEPENDENCIES
 ================================================================================
 
- goinstall go-charset.googlecode.com/hg/charset
-
-================================================================================
- USAGE
-================================================================================
-
- Getting the package up and running is simple enough. This should also 
- automatically take care of any dependencies for you:
- 
-    $ goinstall github.com/jteeuwen/go-pkg-xmlx
-
- Using it:
-
-    import xmlx "github.com/jteeuwen/go-pkg-xmlx"
+ none
 
 ================================================================================
  API
