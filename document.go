@@ -46,7 +46,6 @@ type Document struct {
 	StandAlone    string            // Value of XML doctype's 'standalone' attribute.
 	Entity        map[string]string // Mapping of custom entity conversions.
 	Root          *Node             // The document's root node.
-	CharsetReader CharsetFunc       // Override the xml decoder's CharsetReader. Defaults to nil.
 	SaveDocType   bool              // Whether not to include the XML doctype in saves.
 }
 
@@ -58,7 +57,6 @@ func New() *Document {
 		StandAlone:    "yes",
 		SaveDocType:   true,
 		Entity:        make(map[string]string),
-		CharsetReader: nil,
 	}
 }
 
@@ -82,10 +80,10 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 }
 
 // Load the contents of this document from the supplied reader.
-func (this *Document) LoadStream(r io.Reader) (err error) {
+func (this *Document) LoadStream(r io.Reader, charset CharsetFunc) (err error) {
 	xp := xml.NewDecoder(r)
 	xp.Entity = this.Entity
-	xp.CharsetReader = this.CharsetReader
+	xp.CharsetReader = charset
 
 	this.Root = NewNode(NT_ROOT)
 	ct := this.Root
@@ -151,35 +149,35 @@ func (this *Document) LoadStream(r io.Reader) (err error) {
 }
 
 // Load the contents of this document from the supplied byte slice.
-func (this *Document) LoadBytes(d []byte) (err error) {
-	return this.LoadStream(bytes.NewBuffer(d))
+func (this *Document) LoadBytes(d []byte, charset CharsetFunc) (err error) {
+	return this.LoadStream(bytes.NewBuffer(d), charset)
 }
 
 // Load the contents of this document from the supplied string.
-func (this *Document) LoadString(s string) (err error) {
-	return this.LoadStream(strings.NewReader(s))
+func (this *Document) LoadString(s string, charset CharsetFunc) (err error) {
+	return this.LoadStream(strings.NewReader(s), charset)
 }
 
 // Load the contents of this document from the supplied file.
-func (this *Document) LoadFile(filename string) (err error) {
+func (this *Document) LoadFile(filename string, charset CharsetFunc) (err error) {
 	var fd *os.File
 	if fd, err = os.Open(filename); err != nil {
 		return
 	}
 
 	defer fd.Close()
-	return this.LoadStream(fd)
+	return this.LoadStream(fd, charset)
 }
 
 // Load the contents of this document from the supplied uri.
-func (this *Document) LoadUri(uri string) (err error) {
+func (this *Document) LoadUri(uri string, charset CharsetFunc) (err error) {
 	var r *http.Response
 	if r, err = http.Get(uri); err != nil {
 		return
 	}
 
 	defer r.Body.Close()
-	return this.LoadStream(r.Body)
+	return this.LoadStream(r.Body, charset)
 }
 
 // Save the contents of this document to the supplied file.

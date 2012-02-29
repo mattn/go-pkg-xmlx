@@ -9,7 +9,7 @@ import "testing"
 func TestLoadLocal(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadFile("test.xml"); err != nil {
+	if err := doc.LoadFile("test.xml", nil); err != nil {
 		t.Error(err.Error())
 		return
 	}
@@ -23,7 +23,7 @@ func TestLoadLocal(t *testing.T) {
 func TestWildcard(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadFile("test2.xml"); err != nil {
+	if err := doc.LoadFile("test2.xml", nil); err != nil {
 		t.Error(err.Error())
 		return
 	}
@@ -39,7 +39,7 @@ func TestWildcard(t *testing.T) {
 func _TestLoadRemote(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadUri("http://blog.golang.org/feeds/posts/default"); err != nil {
+	if err := doc.LoadUri("http://blog.golang.org/feeds/posts/default", nil); err != nil {
 		t.Error(err.Error())
 		return
 	}
@@ -53,7 +53,7 @@ func _TestLoadRemote(t *testing.T) {
 func TestSave(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadFile("test.xml"); err != nil {
+	if err := doc.LoadFile("test.xml", nil); err != nil {
 		t.Errorf("LoadFile(): %s", err)
 		return
 	}
@@ -67,7 +67,7 @@ func TestSave(t *testing.T) {
 func TestNodeSearch(t *testing.T) {
 	doc := New()
 
-	if err := doc.LoadFile("test1.xml"); err != nil {
+	if err := doc.LoadFile("test1.xml", nil); err != nil {
 		t.Errorf("LoadFile(): %s", err)
 		return
 	}
@@ -95,7 +95,7 @@ type Image struct {
 
 func TestUnmarshal(t *testing.T) {
 	doc := New()
-	err := doc.LoadFile("test1.xml")
+	err := doc.LoadFile("test1.xml", nil)
 
 	if err != nil {
 		t.Errorf("LoadFile(): %s", err)
