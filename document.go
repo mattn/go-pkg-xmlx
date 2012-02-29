@@ -37,25 +37,29 @@ import (
 	"strings"
 )
 
+type CharsetFunc func(charset string, input io.Reader) (io.Reader, error)
+
 // represents a single XML document.
 type Document struct {
-	Version     string            // XML version
-	Encoding    string            // Encoding found in document. If absent, assumes UTF-8.
-	StandAlone  string            // Value of XML doctype's 'standalone' attribute.
-	SaveDocType bool              // Whether not to include the XML doctype in saves.
-	Root        *Node             // The document's root node.
-	Entity      map[string]string // Mapping of custom entity conversions.
-	Verbose     bool              // [depracated] Not actually used anymore.
+	Version       string            // XML version
+	Encoding      string            // Encoding found in document. If absent, assumes UTF-8.
+	StandAlone    string            // Value of XML doctype's 'standalone' attribute.
+	SaveDocType   bool              // Whether not to include the XML doctype in saves.
+	Root          *Node             // The document's root node.
+	Entity        map[string]string // Mapping of custom entity conversions.
+	CharsetReader CharsetFunc       // Override the xml decoder's CharsetReader. Defaults to nil.
+	Verbose       bool              // [depracated] Not actually used anymore.
 }
 
 // Create a new, empty XML document instance.
 func New() *Document {
 	return &Document{
-		Version:     "1.0",
-		Encoding:    "utf-8",
-		StandAlone:  "yes",
-		SaveDocType: true,
-		Entity:      make(map[string]string),
+		Version:       "1.0",
+		Encoding:      "utf-8",
+		StandAlone:    "yes",
+		SaveDocType:   true,
+		Entity:        make(map[string]string),
+		CharsetReader: nil,
 	}
 }
 
@@ -82,9 +86,7 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 func (this *Document) LoadStream(r io.Reader) (err error) {
 	xp := xml.NewDecoder(r)
 	xp.Entity = this.Entity
-	//xp.CharsetReader = func(enc string, input io.Reader) (io.Reader, error) {
-	//	return charset.NewReader(enc, input)
-	//}
+	xp.CharsetReader = this.CharsetReader
 
 	this.Root = NewNode(NT_ROOT)
 	ct := this.Root
