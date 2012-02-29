@@ -43,22 +43,22 @@ type CharsetFunc func(charset string, input io.Reader) (io.Reader, error)
 
 // represents a single XML document.
 type Document struct {
-	Version       string            // XML version
-	Encoding      string            // Encoding found in document. If absent, assumes UTF-8.
-	StandAlone    string            // Value of XML doctype's 'standalone' attribute.
-	Entity        map[string]string // Mapping of custom entity conversions.
-	Root          *Node             // The document's root node.
-	SaveDocType   bool              // Whether not to include the XML doctype in saves.
+	Version     string            // XML version
+	Encoding    string            // Encoding found in document. If absent, assumes UTF-8.
+	StandAlone  string            // Value of XML doctype's 'standalone' attribute.
+	Entity      map[string]string // Mapping of custom entity conversions.
+	Root        *Node             // The document's root node.
+	SaveDocType bool              // Whether not to include the XML doctype in saves.
 }
 
 // Create a new, empty XML document instance.
 func New() *Document {
 	return &Document{
-		Version:       "1.0",
-		Encoding:      "utf-8",
-		StandAlone:    "yes",
-		SaveDocType:   true,
-		Entity:        make(map[string]string),
+		Version:     "1.0",
+		Encoding:    "utf-8",
+		StandAlone:  "yes",
+		SaveDocType: true,
+		Entity:      make(map[string]string),
 	}
 }
 

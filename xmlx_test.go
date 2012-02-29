@@ -85,12 +85,12 @@ func TestNodeSearch(t *testing.T) {
 }
 
 type Image struct {
-	Title       string
-	Url         string
-	Link        string
-	Width       string
-	Height      string
-	Description string
+	Title       string `xml:"title"`
+	Url         string `xml:"url"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	Width       int    `xml:"width"`
+	Height      int    `xml:"height"`
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -108,7 +108,7 @@ func TestUnmarshal(t *testing.T) {
 		return
 	}
 
-	img := Image{}
+	var img Image
 	if err = node.Unmarshal(&img); err != nil {
 		t.Errorf("Unmarshal(): %s", err)
 		return
