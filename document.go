@@ -37,6 +37,8 @@ import (
 	"strings"
 )
 
+// This signature represents a character encoding conversion routine.
+// Used to tell the xml decoder how to deal with non-utf8 characters.
 type CharsetFunc func(charset string, input io.Reader) (io.Reader, error)
 
 // represents a single XML document.
