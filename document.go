@@ -44,11 +44,10 @@ type Document struct {
 	Version       string            // XML version
 	Encoding      string            // Encoding found in document. If absent, assumes UTF-8.
 	StandAlone    string            // Value of XML doctype's 'standalone' attribute.
-	SaveDocType   bool              // Whether not to include the XML doctype in saves.
-	Root          *Node             // The document's root node.
 	Entity        map[string]string // Mapping of custom entity conversions.
+	Root          *Node             // The document's root node.
 	CharsetReader CharsetFunc       // Override the xml decoder's CharsetReader. Defaults to nil.
-	Verbose       bool              // [depracated] Not actually used anymore.
+	SaveDocType   bool              // Whether not to include the XML doctype in saves.
 }
 
 // Create a new, empty XML document instance.
