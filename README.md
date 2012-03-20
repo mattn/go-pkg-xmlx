@@ -36,7 +36,7 @@ conversion to types: int, int64, uint, uint64, float32, float64:
     *node.U64(ns, name string) uint64
     *node.F32(ns, name string) float32
     *node.F64(ns, name string) float64
-    *node.B(namespace, name string) bool
+    *node.B(ns, name string) bool
 
 Note that these functions actually consider child nodes for matching names as
 well as the current node. In effect they first perform a node.SelectNode() and
@@ -70,7 +70,7 @@ function is invoked on:
     *node.Au64(ns, name string) uint64
     *node.Af32(ns, name string) float32
     *node.Af64(ns, name string) float64
-    *node.Ab(namespace, name string) bool
+    *node.Ab(ns, name string) bool
 
 All of these functions return either "" or 0 when the specified node or
 attribute could not be found. No errors are generated.
