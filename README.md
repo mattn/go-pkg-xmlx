@@ -76,10 +76,10 @@ All of these functions return either "" or 0 when the specified node or
 attribute could not be found. No errors are generated.
 
 The namespace name specified in the functions above must either match the
-namespace you expect a node/attr to have, or you can specify a wildcard "*".
+namespace you expect a node/attr to have, or you can specify a wildcard `*`.
 This makes node searches easier in case you do not care what namespace name
 there is or if there is one at all. Node and attribute names as well, may
-be supplied as the wildcard "*". This allows us to fetch all child nodes for
+be supplied as the wildcard `*`. This allows us to fetch all child nodes for
 a given namespace, regardless of their names.
 
 ### License
