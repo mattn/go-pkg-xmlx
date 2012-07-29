@@ -237,7 +237,6 @@ func (this *Node) SelectNodes(namespace, name string) []*Node {
 func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
 	if (namespace == "*" || cn.Name.Space == namespace) && (name == "*" || cn.Name.Local == name) {
 		*list = append(*list, cn)
-		return
 	}
 
 	for _, v := range cn.Children {
