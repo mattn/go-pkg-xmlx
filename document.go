@@ -15,9 +15,12 @@
 
    *xmlx.Document.SelectNode(namespace, name string) *Node;
    *xmlx.Document.SelectNodes(namespace, name string) []*Node;
+   *xmlx.Document.SelectNodesRecursive(namespace, name string) []*Node;
 
  SelectNode() returns the first, single node it finds matching the given name
- and namespace. SelectNodes() returns a slice containing all the matching nodes.
+ and namespace. SelectNodes() returns a slice containing all the matching nodes
+ (without recursing into matching nodes). SelectNodesRecursive() returns a slice
+ of all matching nodes, including nodes inside other matching nodes.
 
  Note that these search functions can be invoked on individual nodes as well.
  This allows you to search only a subset of the entire document.
@@ -77,8 +80,17 @@ func (this *Document) SelectNode(namespace, name string) *Node {
 
 // Select all nodes with the given namespace and name. Returns an empty slice
 // if no matches were found.
+// Select all nodes with the given namespace and name, without recursing
+// into the children of those matches. Returns an empty slice if no matching
+// node was found.
 func (this *Document) SelectNodes(namespace, name string) []*Node {
 	return this.Root.SelectNodes(namespace, name)
+}
+
+// Select all nodes with the given namespace and name, also recursing into the
+// children of those matches. Returns an empty slice if no matches were found.
+func (this *Document) SelectNodesRecursive(namespace, name string) []*Node {
+	return this.Root.SelectNodesRecursive(namespace, name)
 }
 
 // Load the contents of this document from the supplied reader.

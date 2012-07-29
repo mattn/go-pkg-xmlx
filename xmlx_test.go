@@ -31,7 +31,23 @@ func TestWildcard(t *testing.T) {
 	list := doc.SelectNodes("ns", "*")
 
 	if len(list) != 1 {
-		t.Errorf("Wrong number of child elements. Expected 4, got %d.", len(list))
+		t.Errorf("Wrong number of child elements. Expected 1, got %d.", len(list))
+		return
+	}
+}
+
+func TestWildcardRecursive(t *testing.T) {
+	doc := New()
+
+	if err := doc.LoadFile("test2.xml", nil); err != nil {
+		t.Error(err.Error())
+		return
+	}
+
+	list := doc.SelectNodesRecursive("ns", "*")
+
+	if len(list) != 7 {
+		t.Errorf("Wrong number of child elements. Expected 7, got %d.", len(list))
 		return
 	}
 }

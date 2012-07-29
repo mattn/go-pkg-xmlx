@@ -230,17 +230,27 @@ func rec_SelectNode(cn *Node, namespace, name string) *Node {
 // Select multiple nodes by name
 func (this *Node) SelectNodes(namespace, name string) []*Node {
 	list := make([]*Node, 0, 16)
-	rec_SelectNodes(this, namespace, name, &list)
+	rec_SelectNodes(this, namespace, name, &list, false)
 	return list
 }
 
-func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node) {
+// Select multiple nodes by name
+func (this *Node) SelectNodesRecursive(namespace, name string) []*Node {
+	list := make([]*Node, 0, 16)
+	rec_SelectNodes(this, namespace, name, &list, true)
+	return list
+}
+
+func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node, recurse bool) {
 	if (namespace == "*" || cn.Name.Space == namespace) && (name == "*" || cn.Name.Local == name) {
 		*list = append(*list, cn)
+		if !recurse {
+			return
+		}
 	}
 
 	for _, v := range cn.Children {
-		rec_SelectNodes(v, namespace, name, list)
+		rec_SelectNodes(v, namespace, name, list, recurse)
 	}
 }
 
