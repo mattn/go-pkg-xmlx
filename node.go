@@ -9,6 +9,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -18,6 +19,11 @@ const (
 	NT_COMMENT
 	NT_ELEMENT
 )
+
+// IndentPrefix holds the value for a single identation level, if one
+// chooses to want indentation in the node.String() and node.Bytes() output.
+// This would normally be set to a single tab, or a number of spaces.
+var IndentPrefix = ""
 
 type Attr struct {
 	Name  xml.Name // Attribute namespace and name.
@@ -45,7 +51,7 @@ func NewNode(tid byte) *Node {
 // This wraps the standard xml.Unmarshal function and supplies this particular
 // node as the content to be unmarshalled.
 func (this *Node) Unmarshal(obj interface{}) error {
-	return xml.NewDecoder(bytes.NewBuffer(this.Bytes())).Decode(obj)
+	return xml.NewDecoder(bytes.NewBuffer(this.bytes(0))).Decode(obj)
 }
 
 // Get node value as string
@@ -258,18 +264,20 @@ func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node, recurse bo
 // Note that NT_ROOT is a special-case empty node used as the root for a
 // Document. This one has no representation by itself. It merely forwards the
 // String() call to it's child nodes.
-func (this *Node) Bytes() (b []byte) {
+func (this *Node) Bytes() []byte { return this.bytes(0) }
+
+func (this *Node) bytes(indent int) (b []byte) {
 	switch this.Type {
 	case NT_PROCINST:
-		b = this.printProcInst()
+		b = this.printProcInst(indent)
 	case NT_COMMENT:
-		b = this.printComment()
+		b = this.printComment(indent)
 	case NT_DIRECTIVE:
-		b = this.printDirective()
+		b = this.printDirective(indent)
 	case NT_ELEMENT:
-		b = this.printElement()
+		b = this.printElement(indent)
 	case NT_ROOT:
-		b = this.printRoot()
+		b = this.printRoot(indent)
 	}
 	return
 }
@@ -279,32 +287,38 @@ func (this *Node) Bytes() (b []byte) {
 // Document. This one has no representation by itself. It merely forwards the
 // String() call to it's child nodes.
 func (this *Node) String() (s string) {
-	return string(this.Bytes())
+	return string(this.bytes(0))
 }
 
-func (this *Node) printRoot() []byte {
+func (this *Node) printRoot(indent int) []byte {
 	var b bytes.Buffer
 	for _, v := range this.Children {
-		b.Write(v.Bytes())
+		b.Write(v.bytes(indent))
 	}
 	return b.Bytes()
 }
 
-func (this *Node) printProcInst() []byte {
+func (this *Node) printProcInst(indent int) []byte {
 	return []byte("<?" + this.Target + " " + this.Value + "?>")
 }
 
-func (this *Node) printComment() []byte {
+func (this *Node) printComment(indent int) []byte {
 	return []byte("<!-- " + this.Value + " -->")
 }
 
-func (this *Node) printDirective() []byte {
+func (this *Node) printDirective(indent int) []byte {
 	return []byte("<!" + this.Value + "!>")
 }
 
-func (this *Node) printElement() []byte {
+func (this *Node) printElement(indent int) []byte {
 	var b bytes.Buffer
 
+	lineSuffix, linePrefix := "", strings.Repeat(IndentPrefix, indent)
+	if len(IndentPrefix) > 0 {
+		lineSuffix = "\n"
+	}
+
+	b.WriteString(linePrefix)
 	if len(this.Name.Space) > 0 {
 		b.WriteRune('<')
 		b.WriteString(this.Name.Space)
@@ -325,16 +339,23 @@ func (this *Node) printElement() []byte {
 
 	if len(this.Children) == 0 && len(this.Value) == 0 {
 		b.WriteString(" />")
+		b.WriteString(lineSuffix)
 		return b.Bytes()
 	}
 
 	b.WriteRune('>')
+	if len(this.Value) == 0 {
+		b.WriteString(lineSuffix)
+	}
 
 	for _, v := range this.Children {
-		b.Write(v.Bytes())
+		b.Write(v.bytes(indent + 1))
 	}
 
 	b.WriteString(this.Value)
+	if len(this.Value) == 0 {
+		b.WriteString(linePrefix)
+	}
 	if len(this.Name.Space) > 0 {
 		b.WriteString("</")
 		b.WriteString(this.Name.Space)
@@ -346,6 +367,7 @@ func (this *Node) printElement() []byte {
 		b.WriteString(this.Name.Local)
 		b.WriteRune('>')
 	}
+	b.WriteString(lineSuffix)
 
 	return b.Bytes()
 }

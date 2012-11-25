@@ -74,6 +74,7 @@ func TestSave(t *testing.T) {
 		return
 	}
 
+	IndentPrefix = "\t"
 	if err := doc.SaveFile("test1.xml"); err != nil {
 		t.Errorf("SaveFile(): %s", err)
 		return

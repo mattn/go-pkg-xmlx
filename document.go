@@ -29,7 +29,6 @@ package xmlx
 
 import (
 	"bytes"
-	//"code.google.com/p/go-charset/charset"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -206,6 +205,10 @@ func (this *Document) SaveBytes() []byte {
 	if this.SaveDocType {
 		b.WriteString(fmt.Sprintf(`<?xml version="%s" encoding="%s" standalone="%s"?>`,
 			this.Version, this.Encoding, this.StandAlone))
+
+		if len(IndentPrefix) > 0 {
+			b.WriteByte('\n')
+		}
 	}
 
 	b.Write(this.Root.Bytes())
