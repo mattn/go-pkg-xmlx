@@ -7,9 +7,11 @@ as well as perform search queries (no xpath support).
 Nodes now simply become collections and don't require you to read them in the
 order in which the xml.Parser finds them.
 
+
 ### Dependencies
 
 None.
+
 
 ### API
 
@@ -31,8 +33,14 @@ conversion to types: int, int64, uint, uint64, float32, float64:
 
     *node.S(ns, name string) string
     *node.I(ns, name string) int
+    *node.I8(ns, name string) int8
+    *node.I16(ns, name string) int16
+    *node.I32(ns, name string) int32
     *node.I64(ns, name string) int64
     *node.U(ns, name string) uint
+    *node.U8(ns, name string) uint8
+    *node.U16(ns, name string) uint16
+    *node.U32(ns, name string) uint32
     *node.U64(ns, name string) uint64
     *node.F32(ns, name string) float32
     *node.F64(ns, name string) float64
@@ -65,8 +73,14 @@ function is invoked on:
 
     *node.As(ns, name string) string
     *node.Ai(ns, name string) int
+    *node.Ai8(ns, name string) int8
+    *node.Ai16(ns, name string) int16
+    *node.Ai32(ns, name string) int32
     *node.Ai64(ns, name string) int64
     *node.Au(ns, name string) uint
+    *node.Au8(ns, name string) uint8
+    *node.Au16(ns, name string) uint16
+    *node.Au32(ns, name string) uint32
     *node.Au64(ns, name string) uint64
     *node.Af32(ns, name string) float32
     *node.Af64(ns, name string) float64
@@ -81,6 +95,9 @@ This makes node searches easier in case you do not care what namespace name
 there is or if there is one at all. Node and attribute names as well, may
 be supplied as the wildcard `*`. This allows us to fetch all child nodes for
 a given namespace, regardless of their names.
+
+All numeric type-conversion methods assume base-10 numbers data.
+
 
 ### License
 
