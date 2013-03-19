@@ -182,15 +182,22 @@ func (this *Document) LoadFile(filename string, charset CharsetFunc) (err error)
 	return this.LoadStream(fd, charset)
 }
 
-// Load the contents of this document from the supplied uri.
-func (this *Document) LoadUri(uri string, charset CharsetFunc) (err error) {
+// Load the contents of this document from the supplied uri using the specifed
+// client.
+func (this *Document) LoadUriClient(uri string, client *http.Client, charset CharsetFunc) (err error) {
 	var r *http.Response
-	if r, err = http.Get(uri); err != nil {
+	if r, err = client.Get(uri); err != nil {
 		return
 	}
 
 	defer r.Body.Close()
 	return this.LoadStream(r.Body, charset)
+}
+
+// Load the contents of this document from the supplied uri.
+// (calls LoadUriClient with http.DefaultClient)
+func (this *Document) LoadUri(uri string, charset CharsetFunc) (err error) {
+	return this.LoadUriClient(uri, http.DefaultClient, charset)
 }
 
 // Save the contents of this document to the supplied file.
