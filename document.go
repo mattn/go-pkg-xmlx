@@ -117,7 +117,7 @@ func (this *Document) LoadStream(r io.Reader, charset CharsetFunc) (err error) {
 		case xml.SyntaxError:
 			return errors.New(tt.Error())
 		case xml.CharData:
-			ct.Value = strings.TrimSpace(string([]byte(tt)))
+			ct.Value = ct.Value + strings.TrimSpace(string([]byte(tt)))
 		case xml.Comment:
 			t := NewNode(NT_COMMENT)
 			t.Value = strings.TrimSpace(string([]byte(tt)))
