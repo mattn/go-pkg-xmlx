@@ -397,6 +397,16 @@ func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node, recurse bo
 
 func (this *Node) RemoveNameSpace() {
 	this.Name.Space = ""
+	this.RemoveAttr("xmlns")
+}
+
+func (this *Node) RemoveAttr(name string) {
+	for i, v := range this.Attributes {
+		if name == v.Name.Local {
+			//Delete it
+			this.Attributes = append(this.Attributes[:i], this.Attributes[i+1:]...)
+		}
+	}
 }
 
 func (this *Node) SetAttr(name, value string) {
