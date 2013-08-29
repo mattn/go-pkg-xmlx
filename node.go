@@ -27,7 +27,7 @@ var IndentPrefix = ""
 
 type Attr struct {
 	Name  xml.Name // Attribute namespace and name.
-	Value string   // Attribute value. 
+	Value string   // Attribute value.
 }
 
 type Node struct {
@@ -393,6 +393,26 @@ func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node, recurse bo
 	for _, v := range cn.Children {
 		rec_SelectNodes(v, namespace, name, list, recurse)
 	}
+}
+
+func (this *Node) RemoveNameSpace() {
+	this.Name.Space = ""
+}
+
+func (this *Node) SetAttr(name, value string) {
+	for _, v := range this.Attributes {
+		if name == v.Name.Local {
+			v.Value = value
+			return
+		}
+	}
+	//Add
+	attr := new(Attr)
+	attr.Name.Local = name
+	attr.Name.Space = ""
+	attr.Value = value
+	this.Attributes = append(this.Attributes, attr)
+	return
 }
 
 // Convert node to appropriate []byte representation based on it's @Type.
