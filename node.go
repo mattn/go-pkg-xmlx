@@ -397,7 +397,11 @@ func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node, recurse bo
 
 func (this *Node) RemoveNameSpace() {
 	this.Name.Space = ""
-	this.RemoveAttr("xmlns")
+	//	this.RemoveAttr("xmlns") //This is questionable
+
+	for _, v := range this.Children {
+		v.RemoveNameSpace()
+	}
 }
 
 func (this *Node) RemoveAttr(name string) {
