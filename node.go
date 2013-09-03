@@ -500,7 +500,8 @@ func (this *Node) printElement(indent int) []byte {
 
 	for _, v := range this.Attributes {
 		if len(v.Name.Space) > 0 {
-			b.WriteString(fmt.Sprintf(` %s:%s="%s"`, v.Name.Space, v.Name.Local, v.Value))
+			prefix := this.spacePrefix(v.Name.Space)
+			b.WriteString(fmt.Sprintf(` %s:%s="%s"`, prefix, v.Name.Local, v.Value))
 		} else {
 			b.WriteString(fmt.Sprintf(` %s="%s"`, v.Name.Local, v.Value))
 		}
@@ -539,6 +540,20 @@ func (this *Node) printElement(indent int) []byte {
 	b.WriteString(lineSuffix)
 
 	return b.Bytes()
+}
+
+// spacePrefix resolves the given space (e.g. a url) to the prefix it was
+// assigned by an attribute by the current node, or one of its parents.
+func (this *Node) spacePrefix(space string) string {
+	for _, attr := range this.Attributes {
+		if attr.Name.Space == "xmlns" && attr.Value == space {
+			return attr.Name.Local
+		}
+	}
+	if this.Parent == nil {
+		return space
+	}
+	return this.Parent.spacePrefix(space)
 }
 
 // Add a child node
