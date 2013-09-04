@@ -136,3 +136,26 @@ func TestUnmarshal(t *testing.T) {
 		return
 	}
 }
+
+func TestString(t *testing.T) {
+	doc := New()
+	err := doc.LoadFile("test3.xml", nil)
+
+	if err != nil {
+		t.Errorf("LoadFile(): %s", err)
+		return
+	}
+
+	expected := `<root xmlns:foo="http:/example.org/foo">
+	<child foo:bar="1">
+		<grandchild xmlns:foo="">
+			<great-grandchild bar="2" />
+		</grandchild>
+	</child>
+</root>
+`
+
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: %s\ngot: %s\n", expected, got)
+	}
+}
