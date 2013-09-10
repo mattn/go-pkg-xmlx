@@ -137,7 +137,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 }
 
-func TestString(t *testing.T) {
+func TestStringNamespaces(t *testing.T) {
 	doc := New()
 	err := doc.LoadFile("test3.xml", nil)
 
@@ -147,12 +147,29 @@ func TestString(t *testing.T) {
 	}
 
 	expected := `<root xmlns:foo="http:/example.org/foo">
-	<child foo:bar="1">
-		<grandchild xmlns:foo="">
-			<great-grandchild bar="2" />
-		</grandchild>
-	</child>
+  <child foo:bar="1">
+    <grandchild xmlns:foo="">
+      <great-grandchild bar="2">&#xA;      </great-grandchild>
+    </grandchild>
+  </child>
 </root>
+`
+
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: %s\ngot: %s\n", expected, got)
+	}
+}
+
+func TestStringEscaping(t *testing.T) {
+	doc := New()
+	err := doc.LoadFile("test4.xml", nil)
+
+	if err != nil {
+		t.Errorf("LoadFile(): %s", err)
+		return
+	}
+
+	expected := `<body>  &lt;https://example.com/file/fm/SU0vRk0xLzIwMTMwOTEwLzA1MDA0MS5ybXdhdGVzdEByZXV0ZXJzLmNvbTEzNzg4NDU1OTk4OTA/Screen%20Shot%202013-09-10%20at%2021.33.54.png&gt; File Attachment:-Screen Shot 2013-09-10 at 21.33.54.png  </body>
 `
 
 	if got := doc.Root.String(); got != expected {
