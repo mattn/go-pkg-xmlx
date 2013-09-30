@@ -176,3 +176,70 @@ func TestStringEscaping(t *testing.T) {
 		t.Fatalf("expected: %s\ngot: %s\n", expected, got)
 	}
 }
+
+func TestElementNodeValueFetch(t *testing.T) {
+	data := `<car><color>
+	r<cool />
+	ed</color><brand>BMW</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+	doc := New()
+
+	if err := doc.LoadString(data, nil); nil != err {
+		t.Fatalf("LoadString(): %s", err)
+	}
+
+	carN := doc.SelectNode("", "car")
+	if v := carN.S("", "brand"); v != "BMW" {
+		t.Errorf("Failed to get brand as string, got: '%s', wanted: 'BMW'", v)
+	}
+	if v := carN.S("", "color"); v != "red" {
+		t.Errorf("Failed to get color as string, got: '%s', wanted: 'red'", v)
+	}
+
+	if v := carN.I("", "count"); v != 62 {
+		t.Errorf("Failed to get count using I, got: %v, wanted: 62", v)
+	}
+	if v := carN.I8("", "count"); v != 62 {
+		t.Errorf("Failed to get count using I8, got: %v, wanted: 62", v)
+	}
+	if v := carN.I16("", "count"); v != 62 {
+		t.Errorf("Failed to get count using I16, got: %v, wanted: 62", v)
+	}
+	if v := carN.I32("", "count"); v != 62 {
+		t.Errorf("Failed to get count using I32, got: %v, wanted: 62", v)
+	}
+	if v := carN.I64("", "count"); v != 62 {
+		t.Errorf("Failed to get count using I64, got: %v, wanted: 62", v)
+	}
+	if v := carN.U("", "count"); v != 62 {
+		t.Errorf("Failed to get count using U, got: %v, wanted: 62", v)
+	}
+	if v := carN.U8("", "count"); v != 62 {
+		t.Errorf("Failed to get count using U8, got: %v, wanted: 62", v)
+	}
+	if v := carN.U16("", "count"); v != 62 {
+		t.Errorf("Failed to get count using U16, got: %v, wanted: 62", v)
+	}
+	if v := carN.U32("", "count"); v != 62 {
+		t.Errorf("Failed to get count using U32, got: %v, wanted: 62", v)
+	}
+	if v := carN.U64("", "count"); v != 62 {
+		t.Errorf("Failed to get count using U64, got: %v, wanted: 62", v)
+	}
+
+	if v := carN.F32("", "price"); v != 50.25 {
+		t.Errorf("Failed to get price using F32, got: %v, wanted: 50.25", v)
+	}
+	if v := carN.F64("", "price"); v != 50.25 {
+		t.Errorf("Failed to get price using F64, got: %v, wanted: 50.25", v)
+	}
+
+	if v := carN.B("", "available"); v != true {
+		t.Errorf("Failed to get availability using B, got: %v, wanted: true", v)
+	}
+}

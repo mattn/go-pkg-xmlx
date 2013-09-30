@@ -9,6 +9,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -54,20 +55,32 @@ func (this *Node) Unmarshal(obj interface{}) error {
 	return xml.NewDecoder(bytes.NewBuffer(this.bytes())).Decode(obj)
 }
 
+func (this *Node) GetValue() string {
+	res := ""
+	for _, node := range this.Children {
+		if node.Type == NT_TEXT {
+			res += strings.TrimSpace(node.Value)
+		}
+	}
+
+	return res
+}
+
 // Get node value as string
 func (this *Node) S(namespace, name string) string {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil {
-		return node.Value
+	foundNode := rec_SelectNode(this, namespace, name)
+	if foundNode == nil {
+		return ""
+	} else {
+		return foundNode.GetValue()
 	}
-	return ""
 }
 
 // Get node value as int
 func (this *Node) I(namespace, name string) int {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseInt(node.Value, 10, 0)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseInt(value, 10, 0)
 		return int(n)
 	}
 	return 0
@@ -75,9 +88,9 @@ func (this *Node) I(namespace, name string) int {
 
 // Get node value as int8
 func (this *Node) I8(namespace, name string) int8 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseInt(node.Value, 10, 8)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseInt(value, 10, 8)
 		return int8(n)
 	}
 	return 0
@@ -85,9 +98,9 @@ func (this *Node) I8(namespace, name string) int8 {
 
 // Get node value as int16
 func (this *Node) I16(namespace, name string) int16 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseInt(node.Value, 10, 16)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseInt(value, 10, 16)
 		return int16(n)
 	}
 	return 0
@@ -95,9 +108,9 @@ func (this *Node) I16(namespace, name string) int16 {
 
 // Get node value as int32
 func (this *Node) I32(namespace, name string) int32 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseInt(node.Value, 10, 32)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseInt(value, 10, 32)
 		return int32(n)
 	}
 	return 0
@@ -105,9 +118,9 @@ func (this *Node) I32(namespace, name string) int32 {
 
 // Get node value as int64
 func (this *Node) I64(namespace, name string) int64 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseInt(node.Value, 10, 64)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseInt(value, 10, 64)
 		return n
 	}
 	return 0
@@ -115,9 +128,9 @@ func (this *Node) I64(namespace, name string) int64 {
 
 // Get node value as uint
 func (this *Node) U(namespace, name string) uint {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseUint(node.Value, 10, 0)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseUint(value, 10, 0)
 		return uint(n)
 	}
 	return 0
@@ -125,9 +138,9 @@ func (this *Node) U(namespace, name string) uint {
 
 // Get node value as uint8
 func (this *Node) U8(namespace, name string) uint8 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseUint(node.Value, 10, 8)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseUint(value, 10, 8)
 		return uint8(n)
 	}
 	return 0
@@ -135,9 +148,9 @@ func (this *Node) U8(namespace, name string) uint8 {
 
 // Get node value as uint16
 func (this *Node) U16(namespace, name string) uint16 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseUint(node.Value, 10, 16)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseUint(value, 10, 16)
 		return uint16(n)
 	}
 	return 0
@@ -145,9 +158,9 @@ func (this *Node) U16(namespace, name string) uint16 {
 
 // Get node value as uint32
 func (this *Node) U32(namespace, name string) uint32 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseUint(node.Value, 10, 32)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseUint(value, 10, 32)
 		return uint32(n)
 	}
 	return 0
@@ -155,9 +168,9 @@ func (this *Node) U32(namespace, name string) uint32 {
 
 // Get node value as uint64
 func (this *Node) U64(namespace, name string) uint64 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseUint(node.Value, 10, 64)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseUint(value, 10, 64)
 		return n
 	}
 	return 0
@@ -165,9 +178,9 @@ func (this *Node) U64(namespace, name string) uint64 {
 
 // Get node value as float32
 func (this *Node) F32(namespace, name string) float32 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseFloat(node.Value, 32)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseFloat(value, 32)
 		return float32(n)
 	}
 	return 0
@@ -175,9 +188,9 @@ func (this *Node) F32(namespace, name string) float32 {
 
 // Get node value as float64
 func (this *Node) F64(namespace, name string) float64 {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseFloat(node.Value, 64)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseFloat(value, 64)
 		return n
 	}
 	return 0
@@ -185,9 +198,9 @@ func (this *Node) F64(namespace, name string) float64 {
 
 // Get node value as bool
 func (this *Node) B(namespace, name string) bool {
-	node := rec_SelectNode(this, namespace, name)
-	if node != nil && node.Value != "" {
-		n, _ := strconv.ParseBool(node.Value)
+	value := this.S(namespace, name)
+	if value != "" {
+		n, _ := strconv.ParseBool(value)
 		return n
 	}
 	return false
