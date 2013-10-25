@@ -28,10 +28,10 @@ func TestWildcard(t *testing.T) {
 		return
 	}
 
-	list := doc.SelectNodes("ns", "*")
+	list := doc.SelectNodesRecursive("ns", "*")
 
-	if len(list) != 1 {
-		t.Errorf("Wrong number of child elements. Expected 1, got %d.", len(list))
+	if len(list) != 7 {
+		t.Errorf("Wrong number of child elements. Expected 7, got %d.", len(list))
 		return
 	}
 }
@@ -94,9 +94,32 @@ func TestNodeSearch(t *testing.T) {
 		return
 	}
 
-	nodes := doc.SelectNodes("", "item")
+	nodes := doc.SelectNodesRecursive("", "item")
 	if len(nodes) == 0 {
 		t.Errorf("SelectNodes(): no nodes found.")
+		return
+	}
+}
+
+func TestSelectNodes(t *testing.T) {
+	doc := New()
+
+	if err := doc.LoadFile("test1.xml", nil); err != nil {
+		t.Errorf("LoadFile(): %s", err)
+		return
+	}
+
+	ch := doc.SelectNode("", "channel")
+
+	topLevelLinks := ch.SelectNodes("", "link")
+	if len(topLevelLinks) != 1 {
+		t.Errorf("SelectNodes(): Expected 1, Got %d", len(topLevelLinks))
+		return
+	}
+
+	allLinks := ch.SelectNodesRecursive("", "link")
+	if len(allLinks) != 8 {
+		t.Errorf("SelectNodes(): Expected 8, Got %d", len(allLinks))
 		return
 	}
 }
