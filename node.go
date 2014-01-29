@@ -396,13 +396,15 @@ func (this *Node) SelectNodesRecursive(namespace, name string) []*Node {
 }
 
 func rec_SelectNodes(cn *Node, namespace, name string, list *[]*Node, recurse bool) {
+	if (namespace == "*" || cn.Name.Space == namespace) && (name == "*" || cn.Name.Local == name) {
+		*list = append(*list, cn)
+		if !recurse {
+			return
+		}
+	}
+
 	for _, v := range cn.Children {
-		if (namespace == "*" || v.Name.Space == namespace) && (name == "*" || v.Name.Local == name) {
-			*list = append(*list, v)
-		}
-		if recurse {
-			rec_SelectNodes(v, namespace, name, list, recurse)
-		}
+		rec_SelectNodes(v, namespace, name, list, recurse)
 	}
 }
 

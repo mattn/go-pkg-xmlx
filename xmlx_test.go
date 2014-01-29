@@ -28,7 +28,8 @@ func TestWildcard(t *testing.T) {
 		return
 	}
 
-	list := doc.SelectNode("", "xml").SelectNodes("ns", "*")
+	list := doc.SelectNodes("ns", "*")
+
 	if len(list) != 1 {
 		t.Errorf("Wrong number of child elements. Expected 1, got %d.", len(list))
 		return
@@ -93,24 +94,17 @@ func TestNodeSearch(t *testing.T) {
 		return
 	}
 
-	nodes := doc.SelectNodesRecursive("", "item")
+	nodes := doc.SelectNodes("", "item")
 	if len(nodes) == 0 {
 		t.Errorf("SelectNodes(): no nodes found.")
 		return
 	}
 
 	ch := doc.SelectNode("", "channel")
-	// Test that SelectNodes doesn't accidentally do recursive
+	// Test that SelectNodes properly selects multiple nodes
 	links := ch.SelectNodes("", "link")
-	if len(links) != 1 {
-		t.Errorf("SelectNodes(): Expected 1, Got %d", len(links))
-		return
-	}
-
-	// Test SelectNodesRecursive does indeed get all of them
-	links = ch.SelectNodesRecursive("", "link")
 	if len(links) != 8 {
-		t.Errorf("SelectNodesRecursive(): Expected 8, Got %d", len(links))
+		t.Errorf("SelectNodes(): Expected 8, Got %d", len(links))
 		return
 	}
 }
