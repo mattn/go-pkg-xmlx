@@ -251,3 +251,78 @@ func TestElementNodeValueFetch(t *testing.T) {
 		t.Errorf("Failed to get availability using B, got: %v, wanted: true", v)
 	}
 }
+
+func TestElementNodeValueFetchAndSet(t *testing.T) {
+	IndentPrefix = ""
+
+	data := `<car><color>
+	r<cool />
+	ed</color><brand>BM<awesome />W</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+	doc := New()
+
+	if err := doc.LoadString(data, nil); nil != err {
+		t.Fatalf("LoadString(): %s", err)
+	}
+
+	carN := doc.SelectNode("", "car")
+	if carN == nil {
+		t.Fatalf("Failed to get the car, got nil, wanted Node{car}")
+	}
+	
+	colorNode := carN.SelectNode("", "color")
+	if colorNode == nil {
+		t.Fatalf("Failed to get the color, got nil, wanted Node{color}")
+	}
+
+	colorVal := colorNode.GetValue()
+	if colorVal != "red" {
+		t.Fatalf("Failed to get the color, got %v, wanted 'red'", colorVal)
+	}
+
+	colorNode.SetValue("blue")
+
+	expected := `<car><color>blue</color><brand>BM<awesome />W</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+
+
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
+	}
+
+	// now set the brand
+	brandNode := carN.SelectNode("", "brand")
+	if brandNode == nil {
+		t.Fatalf("Failed to get the color, got nil, wanted Node{brand}")
+	}
+
+	brandVal := brandNode.GetValue()
+	if brandVal != "BMW" {
+		t.Fatalf("Failed to get the brand, got %v, wanted 'BMW'", brandVal)
+	}
+
+	brandNode.SetValue("Trabant")
+
+	// Notice, we lose the <awesome /> tag in BMW, that's intentional
+	expected = `<car><color>blue</color><brand>Trabant</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
+	}
+}

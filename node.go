@@ -66,6 +66,13 @@ func (this *Node) GetValue() string {
 	return res
 }
 
+func (this *Node) SetValue(val string) {
+	t := NewNode(NT_TEXT)
+	t.Value = string([]byte(val))
+	t.Parent = this
+	this.Children = []*Node{t} // brutally replace all other children
+}
+
 // Get node value as string
 func (this *Node) S(namespace, name string) string {
 	foundNode := rec_SelectNode(this, namespace, name)
