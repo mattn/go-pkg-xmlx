@@ -4,7 +4,10 @@
 
 package xmlx
 
-import "testing"
+import (
+	"testing"
+	"encoding/xml"
+)
 
 func TestLoadLocal(t *testing.T) {
 	doc := New()
@@ -252,6 +255,45 @@ func TestElementNodeValueFetch(t *testing.T) {
 	}
 }
 
+// node.SetValue(x); x == node.GetValue
+func TestElementNodeValueFetchAndSetIdentity (t *testing.T) {
+	// Setup: <root><text>xyzzy</text></root>
+	// The xmlx parser creates a nameless NT_TEXT node containing the value 'xyzzy' 
+	rootN := NewNode(NT_ROOT)
+	rootN.Name = xml.Name{Space: "", Local: "root"}
+	textN := NewNode(NT_ELEMENT)
+	textN.Name = xml.Name{Space: "", Local: "text"}
+	namelessN := NewNode(NT_TEXT)
+	namelessN.Value = "xyzzy"
+	rootN.AddChild(textN)
+	textN.AddChild(namelessN)
+
+	targetN := rootN.SelectNode("", "text") // selects textN
+	if (targetN != textN) {
+		t.Errorf("Failed to get the correct textN, got %#v", targetN)
+	}
+	
+	// targetN.Value is empty (as the value lives in the childNode)
+	if (targetN.Value != "") {
+		t.Errorf("Failed to prepare correctly, TargetN.Value is not empty, it contains %#v", targetN.Value)
+	}
+
+	// Test correct retrieval
+	if v := rootN.S("", "text"); v != "xyzzy" {
+		t.Errorf("Failed to get value as string, got: '%s', wanted: 'xyzzy'", v)
+	}
+
+	// Set the value of the nameless child
+	targetN.SetValue("plugh")
+
+	// Test correct retrieval
+	if v := rootN.S("", "text"); v != "plugh" {
+		t.Errorf("Failed to get value as string, got: '%s', wanted: 'plugh'", v)
+	}
+}
+
+// Test as it could be used to read in a XML file, change some values and write it out again.
+// For example, a HTML/XML proxy service.
 func TestElementNodeValueFetchAndSet(t *testing.T) {
 	IndentPrefix = ""
 
