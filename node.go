@@ -66,6 +66,15 @@ func (this *Node) GetValue() string {
 	return res
 }
 
+// SetValue sets the value of the node to the given parameter.
+// It deletes all children of the node so the old data does not get back at node.GetValue
+func (this *Node) SetValue(val string) {
+	t := NewNode(NT_TEXT)
+	t.Value = val
+	t.Parent = this
+	this.Children = []*Node{t} // brutally replace all other children
+}
+
 // Get node value as string
 func (this *Node) S(namespace, name string) string {
 	foundNode := rec_SelectNode(this, namespace, name)

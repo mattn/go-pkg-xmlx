@@ -4,7 +4,10 @@
 
 package xmlx
 
-import "testing"
+import (
+	"testing"
+	"encoding/xml"
+)
 
 func TestLoadLocal(t *testing.T) {
 	doc := New()
@@ -249,5 +252,119 @@ func TestElementNodeValueFetch(t *testing.T) {
 
 	if v := carN.B("", "available"); v != true {
 		t.Errorf("Failed to get availability using B, got: %v, wanted: true", v)
+	}
+}
+
+// node.SetValue(x); x == node.GetValue
+func TestElementNodeValueFetchAndSetIdentity (t *testing.T) {
+	// Setup: <root><text>xyzzy</text></root>
+	// The xmlx parser creates a nameless NT_TEXT node containing the value 'xyzzy' 
+	rootN := NewNode(NT_ROOT)
+	rootN.Name = xml.Name{Space: "", Local: "root"}
+	textN := NewNode(NT_ELEMENT)
+	textN.Name = xml.Name{Space: "", Local: "text"}
+	namelessN := NewNode(NT_TEXT)
+	namelessN.Value = "xyzzy"
+	rootN.AddChild(textN)
+	textN.AddChild(namelessN)
+
+	targetN := rootN.SelectNode("", "text") // selects textN
+	if (targetN != textN) {
+		t.Errorf("Failed to get the correct textN, got %#v", targetN)
+	}
+	
+	// targetN.Value is empty (as the value lives in the childNode)
+	if (targetN.Value != "") {
+		t.Errorf("Failed to prepare correctly, TargetN.Value is not empty, it contains %#v", targetN.Value)
+	}
+
+	// Test correct retrieval
+	if v := rootN.S("", "text"); v != "xyzzy" {
+		t.Errorf("Failed to get value as string, got: '%s', wanted: 'xyzzy'", v)
+	}
+
+	// Set the value of the nameless child
+	targetN.SetValue("plugh")
+
+	// Test correct retrieval
+	if v := rootN.S("", "text"); v != "plugh" {
+		t.Errorf("Failed to get value as string, got: '%s', wanted: 'plugh'", v)
+	}
+}
+
+// Test as it could be used to read in a XML file, change some values and write it out again.
+// For example, a HTML/XML proxy service.
+func TestElementNodeValueFetchAndSet(t *testing.T) {
+	IndentPrefix = ""
+
+	data := `<car><color>
+	r<cool />
+	ed</color><brand>BM<awesome />W</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+	doc := New()
+
+	if err := doc.LoadString(data, nil); nil != err {
+		t.Fatalf("LoadString(): %s", err)
+	}
+
+	carN := doc.SelectNode("", "car")
+	if carN == nil {
+		t.Fatalf("Failed to get the car, got nil, wanted Node{car}")
+	}
+	
+	colorNode := carN.SelectNode("", "color")
+	if colorNode == nil {
+		t.Fatalf("Failed to get the color, got nil, wanted Node{color}")
+	}
+
+	colorVal := colorNode.GetValue()
+	if colorVal != "red" {
+		t.Fatalf("Failed to get the color, got %v, wanted 'red'", colorVal)
+	}
+
+	colorNode.SetValue("blue")
+
+	expected := `<car><color>blue</color><brand>BM<awesome />W</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+
+
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
+	}
+
+	// now set the brand
+	brandNode := carN.SelectNode("", "brand")
+	if brandNode == nil {
+		t.Fatalf("Failed to get the color, got nil, wanted Node{brand}")
+	}
+
+	brandVal := brandNode.GetValue()
+	if brandVal != "BMW" {
+		t.Fatalf("Failed to get the brand, got %v, wanted 'BMW'", brandVal)
+	}
+
+	brandNode.SetValue("Trabant")
+
+	// Notice, we lose the <awesome /> tag in BMW, that's intentional
+	expected = `<car><color>blue</color><brand>Trabant</brand><price>50
+	<cheap />.25</price><count>6
+	<small />2
+	</count><available>
+	Tr
+	<found />
+	ue</available></car>`
+
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
 	}
 }
