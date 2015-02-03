@@ -86,6 +86,12 @@ func (this *Document) SelectNodes(namespace, name string) []*Node {
 	return this.Root.SelectNodes(namespace, name)
 }
 
+// Select all nodes directly under this document, with the given namespace
+// and name. Returns an empty slice if no matches were found.
+func (this *Document) SelectNodesDirect(namespace, name string) []*Node {
+	return this.Root.SelectNodesDirect(namespace, name)
+}
+
 // Select all nodes with the given namespace and name, also recursing into the
 // children of those matches. Returns an empty slice if no matches were found.
 func (this *Document) SelectNodesRecursive(namespace, name string) []*Node {
