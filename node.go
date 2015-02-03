@@ -397,6 +397,19 @@ func (this *Node) SelectNodes(namespace, name string) []*Node {
 	return list
 }
 
+// Select multiple nodes directly under this node, by name.
+func (this *Node) SelectNodesDirect(namespace, name string) []*Node {
+	list := make([]*Node, 0, 16)
+
+	for _, v := range this.Children {
+		if (namespace == "*" || v.Name.Space == namespace) && (name == "*" || v.Name.Local == name) {
+			list = append(list, v)
+		}
+	}
+
+	return list
+}
+
 // Select multiple nodes by name
 func (this *Node) SelectNodesRecursive(namespace, name string) []*Node {
 	list := make([]*Node, 0, 16)

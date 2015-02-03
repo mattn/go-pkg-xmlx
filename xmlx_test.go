@@ -5,8 +5,8 @@
 package xmlx
 
 import (
-	"testing"
 	"encoding/xml"
+	"testing"
 )
 
 func TestLoadLocal(t *testing.T) {
@@ -256,9 +256,9 @@ func TestElementNodeValueFetch(t *testing.T) {
 }
 
 // node.SetValue(x); x == node.GetValue
-func TestElementNodeValueFetchAndSetIdentity (t *testing.T) {
+func TestElementNodeValueFetchAndSetIdentity(t *testing.T) {
 	// Setup: <root><text>xyzzy</text></root>
-	// The xmlx parser creates a nameless NT_TEXT node containing the value 'xyzzy' 
+	// The xmlx parser creates a nameless NT_TEXT node containing the value 'xyzzy'
 	rootN := NewNode(NT_ROOT)
 	rootN.Name = xml.Name{Space: "", Local: "root"}
 	textN := NewNode(NT_ELEMENT)
@@ -269,12 +269,12 @@ func TestElementNodeValueFetchAndSetIdentity (t *testing.T) {
 	textN.AddChild(namelessN)
 
 	targetN := rootN.SelectNode("", "text") // selects textN
-	if (targetN != textN) {
+	if targetN != textN {
 		t.Errorf("Failed to get the correct textN, got %#v", targetN)
 	}
-	
+
 	// targetN.Value is empty (as the value lives in the childNode)
-	if (targetN.Value != "") {
+	if targetN.Value != "" {
 		t.Errorf("Failed to prepare correctly, TargetN.Value is not empty, it contains %#v", targetN.Value)
 	}
 
@@ -316,7 +316,7 @@ func TestElementNodeValueFetchAndSet(t *testing.T) {
 	if carN == nil {
 		t.Fatalf("Failed to get the car, got nil, wanted Node{car}")
 	}
-	
+
 	colorNode := carN.SelectNode("", "color")
 	if colorNode == nil {
 		t.Fatalf("Failed to get the color, got nil, wanted Node{color}")
@@ -336,7 +336,6 @@ func TestElementNodeValueFetchAndSet(t *testing.T) {
 	Tr
 	<found />
 	ue</available></car>`
-
 
 	if got := doc.Root.String(); got != expected {
 		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
@@ -366,5 +365,36 @@ func TestElementNodeValueFetchAndSet(t *testing.T) {
 
 	if got := doc.Root.String(); got != expected {
 		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
+	}
+}
+
+func TestSelectNodesDirect(t *testing.T) {
+	data := `<root><wrapper><hidden></hidden>
+	<hidden></hidden></wrapper></root>`
+	doc := New()
+
+	if err := doc.LoadString(data, nil); nil != err {
+		t.Fatalf("LoadString(): %s", err)
+	}
+
+	root := doc.SelectNode("*", "root")
+	if root == nil {
+		t.Fatalf("Failed to get root, got nil, wanted Node{root}")
+	}
+
+	nodes := root.SelectNodesDirect("*", "hidden")
+
+	if len(nodes) != 0 {
+		t.Errorf("SelectDirectNodes should not select children of children.")
+	}
+
+	wrapper := root.SelectNode("*", "wrapper")
+	if wrapper == nil {
+		t.Fatalf("Failed to get wrapper, got nil, wanted Node{wrapper}")
+	}
+
+	nodes = wrapper.SelectNodesDirect("*", "hidden")
+	if len(nodes) != 2 {
+		t.Errorf("Unexcepted hidden nodes found. Expected: 2, Got: %d", len(nodes))
 	}
 }
