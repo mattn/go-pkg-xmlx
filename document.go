@@ -34,7 +34,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -200,7 +199,7 @@ func (this *Document) LoadUriClient(uri string, client *http.Client, charset Cha
 
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		log.Fatalln(err) // TODO
+		return
 	}
 	if len(this.useragent) > 1 {
 		req.Header.Set("User-Agent", this.useragent)
