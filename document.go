@@ -202,7 +202,9 @@ func (this *Document) LoadUriClient(uri string, client *http.Client, charset Cha
 	if err != nil {
 		log.Fatalln(err) // TODO
 	}
-	req.Header.Set("User-Agent", this.useragent)
+	if len(this.useragent) > 1 {
+		req.Header.Set("User-Agent", this.useragent)
+	}
 
 	if r, err = client.Do(req); err != nil {
 		return
