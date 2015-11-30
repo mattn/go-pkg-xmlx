@@ -34,6 +34,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -51,6 +52,8 @@ type Document struct {
 	Entity      map[string]string // Mapping of custom entity conversions.
 	Root        *Node             // The document's root node.
 	SaveDocType bool              // Whether not to include the XML doctype in saves.
+
+	useragent string // Used internally
 }
 
 // Create a new, empty XML document instance.
@@ -194,7 +197,14 @@ func (this *Document) LoadFile(filename string, charset CharsetFunc) (err error)
 // client.
 func (this *Document) LoadUriClient(uri string, client *http.Client, charset CharsetFunc) (err error) {
 	var r *http.Response
-	if r, err = client.Get(uri); err != nil {
+
+	req, err := http.NewRequest("GET", uri, nil)
+	if err != nil {
+		log.Fatalln(err) // TODO
+	}
+	req.Header.Set("User-Agent", this.useragent)
+
+	if r, err = client.Do(req); err != nil {
 		return
 	}
 
@@ -241,4 +251,9 @@ func (this *Document) String() string { return string(this.SaveBytes()) }
 func (this *Document) SaveStream(w io.Writer) (err error) {
 	_, err = w.Write(this.SaveBytes())
 	return
+}
+
+// Set a custom user agent when making a new request.
+func (this *Document) SetUserAgent(s string) {
+	this.useragent = s
 }
