@@ -1,5 +1,11 @@
 ## XMLX
 
+*NOTICE*
+
+This is forked repository that was provided from github.com/jteeuwen/go-pkg-xmlx.
+
+See https://www.reddit.com/r/golang/comments/7vv9zz/popular_lib_gobindata_removed_from_github_or_why/
+
 This package wraps the standard XML library and uses it to build a node tree of
 any document you load. This allows you to look up nodes forwards and backwards,
 as well as perform search queries (no xpath support).
